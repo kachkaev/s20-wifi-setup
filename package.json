@@ -1,0 +1,86 @@
+{
+  "name": "s20-wifi-pairing",
+  "version": "0.0.0",
+  "description": "Pair an Orvibo Wiwo S20 smart plug with a Wi-Fi network from the command line",
+  "keywords": [
+    "orvibo",
+    "wiwo",
+    "s20",
+    "smart-plug",
+    "wifi",
+    "pairing",
+    "cli"
+  ],
+  "homepage": "https://github.com/kachkaev/s20-wifi-pairing#readme",
+  "bugs": {
+    "url": "https://github.com/kachkaev/s20-wifi-pairing/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kachkaev/s20-wifi-pairing.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": {
+    "name": "Alexander Kachkaev",
+    "email": "alexander@kachkaev.ru",
+    "url": "https://en.kachkaev.ru"
+  },
+  "type": "module",
+  "bin": {
+    "s20-wifi-pairing": "./scripts/s20-pairing.script.ts"
+  },
+  "files": [
+    "LICENSE.md",
+    "README.md",
+    "scripts/"
+  ],
+  "scripts": {
+    "fix": "npm-run-all --continue-on-error \"fix:*\"",
+    "fix:eslint": "eslint --max-warnings=0 --fix",
+    "fix:knip": "knip --fix",
+    "fix:markdownlint": "markdownlint --dot --fix .",
+    "fix:pnpm-dedupe": "pnpm dedupe",
+    "fix:prettier": "prettier --write .",
+    "lint": "npm-run-all --continue-on-error \"lint:*\"",
+    "lint:cspell": "cspell --cache --cache-location=node_modules/.cache/cspell/.cspellcache --cache-strategy=content --dot --no-progress \"**/*\"",
+    "lint:eslint": "eslint --max-warnings=0",
+    "lint:knip": "knip",
+    "lint:markdownlint": "markdownlint --dot .",
+    "lint:pnpm-dedupe": "pnpm dedupe --check",
+    "lint:prettier": "prettier --check .",
+    "lint:tsc": "tsc --noEmit",
+    "pair": "node scripts/s20-pairing.script.ts",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "**": [
+      "prettier --ignore-unknown --write"
+    ]
+  },
+  "prettier": "@kachkaev/prettier-config",
+  "dependencies": {
+    "@effect/platform-node": "4.0.0-beta.56",
+    "effect": "4.0.0-beta.57"
+  },
+  "devDependencies": {
+    "@kachkaev/eslint-config-base": "1.1.1",
+    "@kachkaev/markdownlint-config": "1.0.1",
+    "@kachkaev/prettier-config": "2.2.1",
+    "@tsconfig/node-ts": "23.6.4",
+    "@tsconfig/strictest": "2.0.8",
+    "@types/node": "24.12.2",
+    "cspell": "10.0.0",
+    "eslint": "9.39.4",
+    "husky": "9.1.7",
+    "knip": "6.11.0",
+    "lint-staged": "16.4.0",
+    "markdownlint-cli": "0.48.0",
+    "npm-run-all2": "8.0.4",
+    "prettier": "3.8.3",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "pnpm@11.0.3",
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

@@ -1,0 +1,18 @@
+## Dependencies
+/node_modules/
+/.pnp
+.pnp.js
+.pnpm-debug.log*
+
+## TypeScript
+*.tsbuildinfo
+
+## Testing
+/coverage/
+
+## Misc
+.DS_Store
+.husky/_/
+.env*.local
+*.log
+*.pem
