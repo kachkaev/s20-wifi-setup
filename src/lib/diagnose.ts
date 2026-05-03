@@ -571,11 +571,18 @@ const runUdpProbeSection = (options: DiagnoseOptions, reporter: Reporter) =>
   Effect.gen(function* () {
     yield* reporter.section("TypeScript UDP probes (broadcast + unicast)");
 
-    const lines = yield* Effect.all([
-      probeUdp("broadcast", options.broadcastIp, true, options),
-      probeUdp("unicast", options.targetIp, false, options),
-      probeUdp("global-broadcast", "255.255.255.255", true, options),
-    ]).pipe(Effect.map((groups) => groups.flat()));
+    const probeTargets = [
+      ["broadcast", options.broadcastIp, true] as const,
+      ["unicast", options.targetIp, false] as const,
+      ["global-broadcast", "255.255.255.255", true] as const,
+    ];
+    const groups: string[][] = [];
+
+    for (const [label, targetIp, enableBroadcast] of probeTargets) {
+      groups.push(yield* probeUdp(label, targetIp, enableBroadcast, options));
+    }
+
+    const lines = groups.flat();
 
     for (const line of lines) {
       yield* reporter.line(line);
