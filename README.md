@@ -118,9 +118,9 @@ That collects route state, interface state, UDP probes, and a `tcpdump` capture 
 
 ```sh
 pnpm install
+pnpm fix
 pnpm lint
 pnpm test
-pnpm fix
 ```
 
 Useful commands:
@@ -132,7 +132,7 @@ Useful commands:
 - `pnpm test` runs the hardware-free regression suite with built-in `node:test`.
 - `pnpm fix` applies the available autofixes.
 
-## Credits
+## Acknowledgements
 
 This project was inspired by [darrensteele/s20](https://github.com/darrensteele/s20), a Python tool for pairing Orvibo S20 plugs.
 That tool helped confirm the basic UDP pairing flow, even though it did not work on my setup without further changes.
