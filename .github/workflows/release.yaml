@@ -36,10 +36,9 @@ jobs:
         with:
           cache: pnpm
           node-version-file: .tool-versions
-          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Create release pull request or publish to npm
         id: changesets
