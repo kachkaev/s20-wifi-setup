@@ -25,7 +25,7 @@ export default defineConfig({
         inlineDynamicImports: true,
       },
     },
-    target: "node24",
+    target: "node22",
   },
   plugins: [
     {

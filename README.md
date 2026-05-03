@@ -30,7 +30,7 @@ In that case, the pairing flow falls back to subnet broadcast automatically.
 
 ## Requirements
 
-- Node 24+.
+- Node 22+.
 - A laptop connected directly to the plug's AP-mode Wi-Fi network.
 - No active VPN while pairing.
 
