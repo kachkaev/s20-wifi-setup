@@ -4,8 +4,8 @@
     "@tsconfig/strictest/tsconfig.json"
   ],
   "compilerOptions": {
-    "module": "NodeNext",
-    "target": "ESNext",
+    "module": "node20",
+    "target": "esnext",
     "noEmit": true
   },
   "include": ["**/*.ts"],

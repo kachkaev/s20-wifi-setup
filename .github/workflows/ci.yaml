@@ -28,18 +28,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run pnpm lint:eslint
-        if: ${{ success() || failure() }}
-        run: |
-          if ! pnpm lint:eslint; then
-            echo ''
-            echo ''
-            echo 'ℹ️ ℹ️ ℹ️'
-            echo 'Try running `pnpm fix:eslint` locally to apply autofixes.'
-            echo 'ℹ️ ℹ️ ℹ️'
-            exit 1
-          fi
-
       - name: Load CSpell cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
@@ -58,6 +46,18 @@ jobs:
             echo 'Please fix the above errors locally for the check to pass.'
             echo 'If you do not see them, try merging target branch into yours.'
             echo 'You can add exceptions to `cspell-words.txt`, if necessary.'
+            echo 'ℹ️ ℹ️ ℹ️'
+            exit 1
+          fi
+
+      - name: Run pnpm lint:eslint
+        if: ${{ success() || failure() }}
+        run: |
+          if ! pnpm lint:eslint; then
+            echo ''
+            echo ''
+            echo 'ℹ️ ℹ️ ℹ️'
+            echo 'Try running `pnpm fix:eslint` locally to apply autofixes.'
             echo 'ℹ️ ℹ️ ℹ️'
             exit 1
           fi
@@ -112,6 +112,18 @@ jobs:
             exit 1
           fi
 
+      - name: Run pnpm test
+        if: ${{ success() || failure() }}
+        run: |
+          if ! pnpm test; then
+            echo ''
+            echo ''
+            echo 'ℹ️ ℹ️ ℹ️'
+            echo 'Please fix the above test failures locally for the check to pass.'
+            echo 'ℹ️ ℹ️ ℹ️'
+            exit 1
+          fi
+
       - name: Run pnpm lint:tsc
         if: ${{ success() || failure() }}
         run: |
@@ -121,18 +133,6 @@ jobs:
             echo 'ℹ️ ℹ️ ℹ️'
             echo 'Please fix the above errors locally for the check to pass.'
             echo 'If you don’t see them, try merging target branch into yours.'
-            echo 'ℹ️ ℹ️ ℹ️'
-            exit 1
-          fi
-
-      - name: Run pnpm test
-        if: ${{ success() || failure() }}
-        run: |
-          if ! pnpm test; then
-            echo ''
-            echo ''
-            echo 'ℹ️ ℹ️ ℹ️'
-            echo 'Please fix the above test failures locally for the check to pass.'
             echo 'ℹ️ ℹ️ ℹ️'
             exit 1
           fi

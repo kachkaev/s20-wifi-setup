@@ -121,8 +121,8 @@ pnpm fix
 
 Useful commands:
 
-- `pnpm pair -- --ssid "MyWifi" --password "super-secret"` runs the pairing CLI.
-- `pnpm diagnose` runs the diagnostics CLI.
+- `node src/cli.ts pair --ssid "MyWifi" --password "super-secret"` runs the pairing CLI locally.
+- `node src/cli.ts diagnose` runs the diagnostics CLI locally.
 - `pnpm lint` runs cspell, eslint, knip, markdownlint, pnpm dedupe, prettier, and TypeScript checks.
 - `pnpm test` runs the hardware-free regression suite with built-in `node:test`.
 - `pnpm fix` applies the available autofixes.
