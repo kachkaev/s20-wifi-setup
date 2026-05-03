@@ -27,7 +27,9 @@ export const runPingStep = (
         ? ["-c2", "-W500", host]
         : options.platform === "linux"
           ? ["-c2", "-W1", host]
-          : ["-c2", host];
+          : options.platform === "win32"
+            ? ["-n", "2", host]
+            : ["-c2", host];
 
     yield* reporter.section(`ping ${args.join(" ")}`);
 

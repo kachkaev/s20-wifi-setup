@@ -20,7 +20,7 @@ export const diagnoseCommand = Command.make("diagnose", {
   ),
   targetIp: Flag.string("target-ip").pipe(
     Flag.withDefault(defaultTargetIp),
-    Flag.withDescription("Target S20 AP-mode IP to probe"),
+    Flag.withDescription("Plug IP to probe on the temporary Wi-Fi network"),
   ),
   gatewayIp: Flag.string("gateway-ip").pipe(
     Flag.withDefault(defaultGatewayIp),
@@ -28,23 +28,23 @@ export const diagnoseCommand = Command.make("diagnose", {
   ),
   broadcastIp: Flag.string("broadcast-ip").pipe(
     Flag.withDefault(defaultBroadcastIp),
-    Flag.withDescription("Subnet broadcast IP to probe"),
+    Flag.withDescription("Broadcast IP to probe on the temporary network"),
   ),
   targetPort: Flag.integer("target-port").pipe(
     Flag.withDefault(defaultTargetPort),
-    Flag.withDescription("UDP port used by the S20 pairing protocol"),
+    Flag.withDescription("UDP port used by the plug"),
   ),
   probeTimeoutMs: Flag.integer("probe-timeout-ms").pipe(
     Flag.withDefault(defaultResponseTimeoutMs),
-    Flag.withDescription("Timeout for each UDP probe"),
+    Flag.withDescription("How long to wait for each UDP probe"),
   ),
   captureSeconds: Flag.integer("capture-seconds").pipe(
     Flag.withDefault(4),
-    Flag.withDescription("Upper bound for the tcpdump capture duration"),
+    Flag.withDescription("Maximum tcpdump capture duration in seconds"),
   ),
 }).pipe(
   Command.withDescription(
-    "Collect network diagnostics for a Wiwo S20 pairing session",
+    "Collect a network report for failed pairing on macOS/Linux only",
   ),
   Command.withHandler((config) =>
     runDiagnose({

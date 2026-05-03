@@ -124,6 +124,17 @@ export const buildPlatformDiagnoseSteps = (
     ];
   }
 
+  if (options.platform === "win32") {
+    return [
+      {
+        kind: "skip",
+        header: "Windows-specific network checks",
+        reason:
+          "Skipped: diagnose is not supported on Windows yet, so there is no built-in command profile",
+      },
+    ];
+  }
+
   return [
     {
       kind: "skip",

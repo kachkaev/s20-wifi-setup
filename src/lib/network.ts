@@ -1,6 +1,6 @@
 import * as os from "node:os";
 
-export type SupportedPlatform = "darwin" | "linux" | "other";
+export type SupportedPlatform = "darwin" | "linux" | "win32" | "other";
 
 export const getSupportedPlatform = (
   platform: NodeJS.Platform = process.platform,
@@ -11,6 +11,10 @@ export const getSupportedPlatform = (
 
   if (platform === "linux") {
     return "linux";
+  }
+
+  if (platform === "win32") {
+    return "win32";
   }
 
   return "other";

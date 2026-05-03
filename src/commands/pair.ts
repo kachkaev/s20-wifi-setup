@@ -182,6 +182,18 @@ export const validateExpectedResponse = (
 
 const runPair = (options: PairOptions) =>
   Effect.gen(function* () {
+    if (process.platform === "win32") {
+      yield* Console.log("==================================================");
+      yield* Console.log(" WARNING: Windows pairing support is experimental.");
+      yield* Console.log(
+        " This command may work on Windows, but it is mainly developed and tested on macOS and Linux.",
+      );
+      yield* Console.log(" If pairing fails here, retry from macOS or Linux.");
+      yield* Console.log(
+        "==================================================\n",
+      );
+    }
+
     const password = Redacted.value(options.password);
     const broadcastBindIp = findLocalBindIp(options.broadcastIp);
 
@@ -296,38 +308,36 @@ const runPair = (options: PairOptions) =>
 
 export const pairCommand = Command.make("pair", {
   ssid: Flag.string("ssid").pipe(
-    Flag.withDescription("Wi-Fi SSID the S20 should join"),
+    Flag.withDescription("Name of the Wi-Fi network the plug should join"),
     Flag.withFallbackConfig(Config.string("WIFI_SSID")),
   ),
   password: Flag.redacted("password").pipe(
-    Flag.withDescription("WPA2 password for the SSID"),
+    Flag.withDescription("Password for that Wi-Fi network"),
     Flag.withFallbackConfig(Config.redacted("WIFI_PASSWORD")),
   ),
   targetIp: Flag.optional(
     Flag.string("target-ip").pipe(
-      Flag.withDescription(
-        "Skip broadcast discovery and use this S20 IP directly",
-      ),
+      Flag.withDescription("Skip discovery and talk to this plug IP directly"),
       Flag.withFallbackConfig(Config.string("S20_TARGET_IP")),
     ),
   ),
   broadcastIp: Flag.string("broadcast-ip").pipe(
     Flag.withDefault(defaultBroadcastIp),
-    Flag.withDescription("Subnet broadcast address used for discovery"),
+    Flag.withDescription("Broadcast address used to discover the plug"),
     Flag.withFallbackConfig(Config.string("S20_BROADCAST_IP")),
   ),
   targetPort: Flag.integer("target-port").pipe(
     Flag.withDefault(defaultTargetPort),
-    Flag.withDescription("S20 UDP control port"),
+    Flag.withDescription("UDP port used by the plug"),
     Flag.withFallbackConfig(Config.int("S20_TARGET_PORT")),
   ),
   timeoutMs: Flag.integer("timeout-ms").pipe(
     Flag.withDefault(defaultResponseTimeoutMs),
-    Flag.withDescription("How long to wait for each response / discovery"),
+    Flag.withDescription("How long to wait for discovery and replies"),
   ),
 }).pipe(
   Command.withDescription(
-    "Pair an Orvibo Wiwo S20 by sending the AP-mode UDP commands directly",
+    "Pair a Wiwo S20 on macOS/Linux; Windows may also work experimentally",
   ),
   Command.withHandler((config) =>
     runPair({

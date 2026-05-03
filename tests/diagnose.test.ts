@@ -32,6 +32,12 @@ void test("resolveDiagnoseOptions leaves the interface unset on Linux", () => {
   assert.equal(resolved.platform, "linux");
 });
 
+void test("resolveDiagnoseOptions recognizes Windows", () => {
+  const resolved = resolveDiagnoseOptions(makeRawDiagnoseOptions(), "win32");
+  assert.equal(resolved.interfaceName, undefined);
+  assert.equal(resolved.platform, "win32");
+});
+
 void test("buildPlatformDiagnoseSteps returns macOS-specific checks", () => {
   const steps = buildPlatformDiagnoseSteps(
     resolveDiagnoseOptions(makeRawDiagnoseOptions(), "darwin"),
@@ -61,6 +67,21 @@ void test("buildPlatformDiagnoseSteps returns Linux-specific checks", () => {
   }
 
   assert.equal(firstStep.command, "ip");
+});
+
+void test("buildPlatformDiagnoseSteps returns a Windows unsupported note", () => {
+  const steps = buildPlatformDiagnoseSteps(
+    resolveDiagnoseOptions(makeRawDiagnoseOptions(), "win32"),
+  );
+  const [firstStep] = steps;
+
+  assert.notEqual(firstStep, undefined);
+
+  if (firstStep?.kind !== "skip") {
+    assert.fail("expected a Windows skip step");
+  }
+
+  assert.match(firstStep.reason, /not supported on Windows yet/);
 });
 
 void test("resolveDiagnoseStepAvailability marks missing commands as skipped", () => {

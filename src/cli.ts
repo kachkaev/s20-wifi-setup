@@ -8,7 +8,7 @@ import { pairCommand } from "./commands/pair.ts";
 
 const cli = Command.make("s20-wifi-setup").pipe(
   Command.withDescription(
-    "Pair and diagnose Orvibo Wiwo S20 smart plugs from the command line",
+    "Pair and troubleshoot Orvibo Wiwo S20 smart plugs from the command line",
   ),
   Command.withSubcommands([diagnoseCommand, pairCommand]),
 );

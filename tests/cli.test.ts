@@ -25,6 +25,7 @@ void test("pair help exposes the pairing flags", () => {
   const result = runCli("pair", "--help");
 
   assert.equal(result.status, 0);
+  assert.match(result.stdout, /Windows may also work experimentally/);
   assert.match(result.stdout, /--ssid string/);
   assert.match(result.stdout, /--password string/);
 });
@@ -33,6 +34,7 @@ void test("diagnose help exposes the diagnostics flags", () => {
   const result = runCli("diagnose", "--help");
 
   assert.equal(result.status, 0);
+  assert.match(result.stdout, /macOS\/Linux only/);
   assert.match(result.stdout, /--interface string/);
   assert.match(result.stdout, /--capture-seconds integer/);
   assert.doesNotMatch(result.stdout, /--capture-path string/);

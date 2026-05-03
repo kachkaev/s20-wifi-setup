@@ -235,6 +235,20 @@ export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
     );
     yield* reporter.line("==================================================");
 
+    if (options.platform === "win32") {
+      yield* reporter.line("");
+      yield* reporter.line(
+        "==================================================",
+      );
+      yield* reporter.line(" WARNING: `diagnose` is not supported on Windows.");
+      yield* reporter.line(
+        " The report below is best-effort only and omits the macOS/Linux checks this command was built for.",
+      );
+      yield* reporter.line(
+        "==================================================",
+      );
+    }
+
     yield* runNodeSnapshot(options, reporter);
 
     for (const step of platformSteps.map((platformStep) =>
