@@ -3,9 +3,7 @@ import { Command, Flag } from "effect/unstable/cli";
 
 import {
   defaultBroadcastIp,
-  defaultCapturePath,
   defaultGatewayIp,
-  defaultReportPath,
   defaultResponseTimeoutMs,
   defaultTargetIp,
   defaultTargetPort,
@@ -44,14 +42,6 @@ export const diagnoseCommand = Command.make("diagnose", {
     Flag.withDefault(4),
     Flag.withDescription("Upper bound for the tcpdump capture duration"),
   ),
-  reportPath: Flag.string("report-path").pipe(
-    Flag.withDefault(defaultReportPath),
-    Flag.withDescription("Where to write the full text diagnostic report"),
-  ),
-  capturePath: Flag.string("capture-path").pipe(
-    Flag.withDefault(defaultCapturePath),
-    Flag.withDescription("Where to write the tcpdump capture log"),
-  ),
 }).pipe(
   Command.withDescription(
     "Collect network diagnostics for a Wiwo S20 pairing session",
@@ -65,8 +55,6 @@ export const diagnoseCommand = Command.make("diagnose", {
       targetPort: config.targetPort,
       probeTimeoutMs: config.probeTimeoutMs,
       captureSeconds: config.captureSeconds,
-      reportPath: config.reportPath,
-      capturePath: config.capturePath,
     }),
   ),
 );

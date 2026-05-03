@@ -88,8 +88,3 @@ export const formatLinuxNeighbours = (text: string, targetIp: string) => {
 
   return lines.length > 0 ? lines.join("\n") : "(no matching neighbours)";
 };
-
-export const formatCapturePreview = (text: string) => {
-  const preview = text.split(/\r?\n/).slice(0, 200).join("\n").trimEnd();
-  return preview.length > 0 ? preview : "(no packets captured)";
-};

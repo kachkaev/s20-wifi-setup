@@ -74,11 +74,7 @@ If anything goes wrong, collect diagnostics and consult an LLM of your choice:
 npx s20-wifi-setup@latest diagnose
 ```
 
-By default, `diagnose` writes:
-
-- `/tmp/s20-diag.txt`
-- `/tmp/s20-tcpdump.txt`
-
+`diagnose` writes its full report to stdout.
 It may prompt for `sudo` so it can clear stale ARP state and run `tcpdump`.
 
 ## Pair flags
@@ -94,17 +90,15 @@ It may prompt for `sudo` so it can clear stale ARP state and run `tcpdump`.
 
 ## Diagnose Flags
 
-| Flag                 | Default                |
-| -------------------- | ---------------------- |
-| `--interface`        | `en0` on macOS         |
-| `--target-ip`        | `10.10.100.254`        |
-| `--gateway-ip`       | `10.10.100.1`          |
-| `--broadcast-ip`     | `10.10.100.255`        |
-| `--target-port`      | `48899`                |
-| `--probe-timeout-ms` | `3000`                 |
-| `--capture-seconds`  | `4`                    |
-| `--report-path`      | `/tmp/s20-diag.txt`    |
-| `--capture-path`     | `/tmp/s20-tcpdump.txt` |
+| Flag                 | Default         |
+| -------------------- | --------------- |
+| `--interface`        | `en0` on macOS  |
+| `--target-ip`        | `10.10.100.254` |
+| `--gateway-ip`       | `10.10.100.1`   |
+| `--broadcast-ip`     | `10.10.100.255` |
+| `--target-port`      | `48899`         |
+| `--probe-timeout-ms` | `3000`          |
+| `--capture-seconds`  | `4`             |
 
 ## Troubleshooting
 

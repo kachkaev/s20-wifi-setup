@@ -34,5 +34,6 @@ void test("diagnose help exposes the diagnostics flags", () => {
 
   assert.equal(result.status, 0);
   assert.match(result.stdout, /--interface string/);
-  assert.match(result.stdout, /--capture-path string/);
+  assert.match(result.stdout, /--capture-seconds integer/);
+  assert.doesNotMatch(result.stdout, /--capture-path string/);
 });

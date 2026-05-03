@@ -25,7 +25,6 @@ function createReporter() {
       Effect.sync(() => {
         sections.push(title);
       }),
-    flush: () => Effect.void,
   };
 
   return { reporter, sections, lines };
@@ -40,8 +39,6 @@ function makeDiagnoseOptions(): DiagnoseOptions {
     targetPort: 48_899,
     probeTimeoutMs: 3000,
     captureSeconds: 4,
-    reportPath: "/tmp/s20-diag.txt",
-    capturePath: "/tmp/s20-tcpdump.txt",
     platform: "darwin",
   };
 }

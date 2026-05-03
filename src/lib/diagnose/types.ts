@@ -11,8 +11,6 @@ export type RawDiagnoseOptions = {
   readonly targetPort: number;
   readonly probeTimeoutMs: number;
   readonly captureSeconds: number;
-  readonly reportPath: string;
-  readonly capturePath: string;
 };
 
 export type DiagnoseOptions = RawDiagnoseOptions & {
@@ -22,7 +20,6 @@ export type DiagnoseOptions = RawDiagnoseOptions & {
 export type Reporter = {
   readonly line: (text?: string) => Effect.Effect<void>;
   readonly section: (title: string) => Effect.Effect<void>;
-  readonly flush: () => Effect.Effect<void, Error>;
 };
 
 type DiagnoseStepCommand = {

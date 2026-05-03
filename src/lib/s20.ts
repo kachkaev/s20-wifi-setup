@@ -3,8 +3,6 @@ export const defaultGatewayIp = "10.10.100.1";
 export const defaultTargetIp = "10.10.100.254";
 export const defaultTargetPort = 48_899;
 export const defaultResponseTimeoutMs = 3000;
-export const defaultCapturePath = "/tmp/s20-tcpdump.txt";
-export const defaultReportPath = "/tmp/s20-diag.txt";
 export const discoveryMessage = "HF-A11ASSISTHREAD";
 const okReply = "+ok";
 

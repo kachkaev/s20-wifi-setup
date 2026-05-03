@@ -1,11 +1,6 @@
-import { writeFile } from "node:fs/promises";
-
 import { Effect } from "effect";
 
-import {
-  formatCapturePreview,
-  normalizeCapturedOutput,
-} from "./diagnose/format.ts";
+import { normalizeCapturedOutput } from "./diagnose/format.ts";
 import { buildPlatformDiagnoseSteps } from "./diagnose/platform-steps.ts";
 import {
   runNodeSnapshot,
@@ -29,9 +24,7 @@ import {
 } from "./process.ts";
 import {
   defaultBroadcastIp,
-  defaultCapturePath,
   defaultGatewayIp,
-  defaultReportPath,
   defaultResponseTimeoutMs,
   defaultTargetIp,
   defaultTargetPort,
@@ -82,8 +75,6 @@ export const resolveDiagnoseOptions = (
       input.probeTimeoutMs || defaultResponseTimeoutMs,
     ),
     captureSeconds: Math.max(1, input.captureSeconds || 4),
-    reportPath: input.reportPath || defaultReportPath,
-    capturePath: input.capturePath || defaultCapturePath,
     platform: supportedPlatform,
   };
 };
@@ -222,7 +213,7 @@ const runArpClearStep = (
 export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
   Effect.gen(function* () {
     const options = resolveDiagnoseOptions(rawOptions);
-    const reporter = createReporter(options.reportPath);
+    const reporter = createReporter();
     const platformSteps = buildPlatformDiagnoseSteps(options);
     const requiredCommands = [
       ...new Set(
@@ -286,9 +277,7 @@ export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
         );
 
         captureStopper = capture.stop;
-        yield* reporter.line(
-          `tcpdump will be written to ${options.capturePath} when capture stops`,
-        );
+        yield* reporter.line("tcpdump output will be shown when capture stops");
       } catch (error) {
         yield* reporter.line(
           `Could not start tcpdump: ${
@@ -315,32 +304,24 @@ export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
       const captureResult = yield* captureStopper();
       const captureText = normalizeCapturedOutput(captureResult);
 
-      yield* Effect.promise(() =>
-        writeFile(options.capturePath, `${captureText}\n`, "utf8"),
-      );
-
-      yield* reporter.section(`tcpdump capture (${options.capturePath})`);
-      yield* reporter.line(formatCapturePreview(captureText));
+      yield* reporter.section("tcpdump capture");
+      yield* reporter.line(captureText);
     } else {
-      yield* reporter.section(`tcpdump capture (${options.capturePath})`);
+      yield* reporter.section("tcpdump capture");
       yield* reporter.line("Skipped: no capture was started");
     }
 
     yield* reporter.line("");
     yield* reporter.line("==================================================");
-    yield* reporter.line(` Done. Full output: ${options.reportPath}`);
+    yield* reporter.line(" Done.");
     yield* reporter.line("==================================================");
-
-    yield* reporter.flush();
   });
 
 export { buildPlatformDiagnoseSteps } from "./diagnose/platform-steps.ts";
 export type { DiagnoseStep } from "./diagnose/types.ts";
 export {
   defaultBroadcastIp,
-  defaultCapturePath,
   defaultGatewayIp,
-  defaultReportPath,
   defaultResponseTimeoutMs,
   defaultTargetIp,
   defaultTargetPort,
