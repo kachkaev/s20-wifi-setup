@@ -1,5 +1,12 @@
 # s20-wifi-setup
 
+## 0.4.0
+
+### Minor Changes
+
+- Improve onboarding docs for first-time S20 owners and clarify the current
+  Windows support story across the README and CLI output.
+
 ## 0.3.0
 
 ### Minor Changes
