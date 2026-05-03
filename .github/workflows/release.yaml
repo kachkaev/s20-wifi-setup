@@ -40,6 +40,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Verify build
+        run: pnpm build
+
+      - name: Verify lint
+        run: pnpm lint
+
+      - name: Verify bundled CLI
+        run: node dist/cli.js --help
+
+      - name: Verify tests
+        run: pnpm test
+
       - name: Create release pull request or prepare publish
         id: changesets
         uses: changesets/action@c48e67d110a68bc90ccf1098e9646092baacaa87 # v1.6.0
