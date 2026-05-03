@@ -16,6 +16,7 @@ IPs
 kachkaev
 Kachkaev
 knip
+LGS
 LLINFO
 LLM
 LPB
@@ -26,6 +27,7 @@ msgpackr
 netstat
 networksetup
 Orvibo
+RAPEX
 recvfrom
 REUSEADDR
 sed

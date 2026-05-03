@@ -1,6 +1,6 @@
 {
   "name": "s20-wifi-pairing",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Pair an Orvibo Wiwo S20 smart plug with a Wi-Fi network from the command line",
   "keywords": [
     "orvibo",
@@ -35,6 +35,8 @@
     "src/"
   ],
   "scripts": {
+    "changesets:publish": "changeset publish",
+    "changesets:version": "changeset version && pnpm install --lockfile-only --no-frozen-lockfile",
     "fix": "npm-run-all --continue-on-error \"fix:*\"",
     "fix:eslint": "eslint --max-warnings=0 --fix",
     "fix:knip": "knip --fix",
@@ -63,6 +65,9 @@
     "effect": "4.0.0-beta.59"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "0.6.0",
+    "@changesets/cli": "2.31.0",
+    "@changesets/config": "3.1.4",
     "@kachkaev/eslint-config-base": "1.1.1",
     "@kachkaev/markdownlint-config": "1.0.1",
     "@kachkaev/prettier-config": "2.2.1",
@@ -82,5 +87,9 @@
   "packageManager": "pnpm@11.0.3",
   "engines": {
     "node": ">=24.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

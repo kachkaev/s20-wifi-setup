@@ -1,0 +1,14 @@
+{
+  "$schema": "../node_modules/@changesets/config/schema.json",
+  "access": "public",
+  "baseBranch": "main",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "kachkaev/s20-wifi-pairing" }
+  ],
+  "commit": false,
+  "fixed": [],
+  "ignore": [],
+  "linked": [],
+  "updateInternalDependencies": "patch"
+}
