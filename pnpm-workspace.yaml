@@ -1,3 +1,4 @@
 allowBuilds:
+  esbuild: true # Required by Vite to install the platform-specific esbuild binary used during bundling.
   msgpackr-extract: true # Required by effect -> msgpackr on pnpm 11+, including CI installs.
 nodeLinker: isolated

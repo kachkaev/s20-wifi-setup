@@ -34,7 +34,7 @@ In that case, the pairing flow falls back to subnet broadcast automatically.
 - A laptop connected directly to the plug's AP-mode Wi-Fi network.
 - No active VPN while pairing.
 
-This package executes `.ts` files directly, so the Node 24+ requirement is intentional.
+The published CLI ships as a bundled Node script, so users do not need any additional TypeScript runtime.
 
 ## Usage
 
@@ -131,6 +131,7 @@ pnpm fix
 
 Useful commands:
 
+- `pnpm build` emits the bundled `dist/cli.js` artifact used for npm publishing.
 - `node src/cli.ts pair --ssid "MyWifi" --password "super-secret"` runs the pairing CLI locally.
 - `node src/cli.ts diagnose` runs the diagnostics CLI locally.
 - `pnpm lint` runs cspell, eslint, knip, markdownlint, pnpm dedupe, prettier, and TypeScript checks.

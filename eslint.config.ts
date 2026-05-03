@@ -5,7 +5,7 @@ export default defineConfig([
   ...generateBaseConfigs({ tsconfigRootDir: import.meta.dirname }),
 
   {
-    ignores: [".husky/**"],
+    ignores: [".husky/**", "dist/**"],
   },
 
   {

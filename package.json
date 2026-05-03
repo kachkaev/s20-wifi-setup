@@ -1,6 +1,6 @@
 {
   "name": "s20-wifi-setup",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Pair an Orvibo Wiwo S20 smart plug with a Wi-Fi network from the command line",
   "keywords": [
     "orvibo",
@@ -28,14 +28,15 @@
   },
   "type": "module",
   "bin": {
-    "s20-wifi-setup": "./src/cli.ts"
+    "s20-wifi-setup": "./dist/cli.js"
   },
   "files": [
     "LICENSE.md",
     "README.md",
-    "src/"
+    "dist/"
   ],
   "scripts": {
+    "build": "vite build",
     "changesets:publish": "changeset publish",
     "changesets:version": "changeset version && pnpm install --lockfile-only --no-frozen-lockfile",
     "fix": "npm-run-all --continue-on-error \"fix:*\"",
@@ -52,6 +53,7 @@
     "lint:pnpm-dedupe": "pnpm dedupe --check",
     "lint:prettier": "prettier --check .",
     "lint:tsc": "tsc --noEmit",
+    "prepack": "pnpm build",
     "prepare": "node .husky/install.mjs",
     "test": "node --test tests/*.test.ts"
   },
@@ -61,14 +63,11 @@
     ]
   },
   "prettier": "@kachkaev/prettier-config",
-  "dependencies": {
-    "@effect/platform-node": "4.0.0-beta.59",
-    "effect": "4.0.0-beta.59"
-  },
   "devDependencies": {
     "@changesets/changelog-github": "0.6.0",
     "@changesets/cli": "2.31.0",
     "@changesets/config": "3.1.4",
+    "@effect/platform-node": "4.0.0-beta.59",
     "@kachkaev/eslint-config-base": "1.1.1",
     "@kachkaev/markdownlint-config": "1.0.1",
     "@kachkaev/prettier-config": "2.2.1",
@@ -76,6 +75,7 @@
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.12.2",
     "cspell": "10.0.0",
+    "effect": "4.0.0-beta.59",
     "eslint": "9.39.4",
     "husky": "9.1.7",
     "knip": "6.11.0",
@@ -83,7 +83,8 @@
     "markdownlint-cli": "0.48.0",
     "npm-run-all2": "8.0.4",
     "prettier": "3.8.3",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vite": "7.2.0"
   },
   "packageManager": "pnpm@11.0.3",
   "engines": {

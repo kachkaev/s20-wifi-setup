@@ -9,8 +9,8 @@ on:
       - main
 
 jobs:
-  lint:
-    name: Lint
+  checks:
+    name: Run checks
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
@@ -35,6 +35,18 @@ jobs:
           path: node_modules/.cache/cspell
           restore-keys: |
             cspell-
+
+      - name: Run pnpm build
+        if: ${{ success() || failure() }}
+        run: |
+          if ! pnpm build; then
+            echo ''
+            echo ''
+            echo 'ℹ️ ℹ️ ℹ️'
+            echo 'Please fix the above build errors locally for the check to pass.'
+            echo 'ℹ️ ℹ️ ℹ️'
+            exit 1
+          fi
 
       - name: Run pnpm lint:cspell
         if: ${{ success() || failure() }}
@@ -121,6 +133,18 @@ jobs:
             echo 'ℹ️ ℹ️ ℹ️'
             echo 'Please fix the above errors locally for the check to pass.'
             echo 'If you don’t see them, try merging target branch into yours.'
+            echo 'ℹ️ ℹ️ ℹ️'
+            exit 1
+          fi
+
+      - name: Run node dist/cli.js --help
+        if: ${{ success() || failure() }}
+        run: |
+          if ! node dist/cli.js --help; then
+            echo ''
+            echo ''
+            echo 'ℹ️ ℹ️ ℹ️'
+            echo 'Please fix the above bundled CLI errors locally for the check to pass.'
             echo 'ℹ️ ℹ️ ℹ️'
             exit 1
           fi
