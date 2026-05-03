@@ -5,15 +5,21 @@ import { Effect } from "effect";
 import { findLocalBindIp } from "../network.ts";
 import { runCapturedCommand } from "../process.ts";
 import { discoveryMessage } from "../s20.ts";
-import { sendUdpOnce } from "../udp.ts";
+import { sendUdpOnce, type UdpResponse } from "../udp.ts";
 import { normalizeCapturedOutput } from "./format.ts";
 import type { DiagnoseOptions, Reporter } from "./types.ts";
+
+type RunCapturedCommandFn = typeof runCapturedCommand;
+type SendUdpFn = (
+  options: Parameters<typeof sendUdpOnce>[0],
+) => Effect.Effect<readonly UdpResponse[], Error>;
 
 export const runPingStep = (
   host: string,
   options: DiagnoseOptions,
   reporter: Reporter,
   availableCommands: Readonly<Record<string, boolean>>,
+  runCommand: RunCapturedCommandFn = runCapturedCommand,
 ) =>
   Effect.gen(function* () {
     const args =
@@ -31,7 +37,7 @@ export const runPingStep = (
     }
 
     try {
-      const result = yield* runCapturedCommand("ping", args);
+      const result = yield* runCommand("ping", args);
       yield* reporter.line(normalizeCapturedOutput(result));
     } catch (error) {
       yield* reporter.line(
@@ -47,13 +53,14 @@ const probeUdp = (
   targetIp: string,
   enableBroadcast: boolean,
   options: DiagnoseOptions,
+  sendUdp: SendUdpFn,
 ) =>
   Effect.gen(function* () {
     const localBindIp =
       findLocalBindIp(options.targetIp) ?? findLocalBindIp(options.broadcastIp);
 
     try {
-      const responses = yield* sendUdpOnce({
+      const responses = yield* sendUdp({
         message: discoveryMessage,
         targetIp,
         targetPort: options.targetPort,
@@ -85,6 +92,7 @@ const probeUdp = (
 export const runUdpProbeSection = (
   options: DiagnoseOptions,
   reporter: Reporter,
+  sendUdp: SendUdpFn = sendUdpOnce,
 ) =>
   Effect.gen(function* () {
     yield* reporter.section("TypeScript UDP probes (broadcast + unicast)");
@@ -99,7 +107,13 @@ export const runUdpProbeSection = (
     // Reuse the same local UDP port safely by probing one target at a time.
     for (const [label, targetIp, enableBroadcast] of probeTargets) {
       lines.push(
-        ...(yield* probeUdp(label, targetIp, enableBroadcast, options)),
+        ...(yield* probeUdp(
+          label,
+          targetIp,
+          enableBroadcast,
+          options,
+          sendUdp,
+        )),
       );
     }
 

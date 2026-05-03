@@ -16,6 +16,7 @@ import {
   isTransientSendError,
   type SendOptions,
   sendUdpOnce,
+  type UdpResponse,
 } from "../lib/udp.ts";
 
 type PairOptions = {
@@ -27,7 +28,7 @@ type PairOptions = {
   readonly timeoutMs: number;
 };
 
-type ExpectedResponse = {
+export type ExpectedResponse = {
   readonly description: string;
   readonly matches: (text: string) => boolean;
 };
@@ -43,10 +44,10 @@ const formatUdpLine = (ip: string, port: number, text: string) =>
 const formatCommand = (message: string) =>
   message.replace(/\r$/, String.raw`\r`);
 
-const buildPairFailedMessage = (
+export const buildPairFailedMessage = (
   message: string,
   expectedResponse: ExpectedResponse | undefined,
-  responses: ReadonlyArray<{ readonly text: string }>,
+  responses: ReadonlyArray<Pick<UdpResponse, "text">>,
 ) =>
   [
     `Pairing failed after sending ${formatCommand(message)}.`,
@@ -134,31 +135,50 @@ const discoverDevice = (
     return firstReply.ip;
   });
 
-const sendUdpWithBroadcastFallback = (
+type SendUdpEffect = (
   options: SendOptions,
-  fallbackBroadcastIp: string,
-) =>
-  sendUdpOnce(options).pipe(
-    Effect.catch((error) =>
-      !options.enableBroadcast && isTransientSendError(error)
-        ? Console.log(
-            `  ↻ ${getErrnoCode(error) ?? "error"}, retrying via broadcast ${fallbackBroadcastIp}...`,
-          ).pipe(
-            Effect.andThen(
-              retryTransient(
-                () =>
-                  sendUdpOnce({
-                    ...options,
-                    targetIp: fallbackBroadcastIp,
-                    enableBroadcast: true,
-                  }),
-                6,
+) => Effect.Effect<readonly UdpResponse[], Error>;
+
+export const createSendUdpWithBroadcastFallback =
+  (sendUdp: SendUdpEffect = sendUdpOnce) =>
+  (options: SendOptions, fallbackBroadcastIp: string) =>
+    sendUdp(options).pipe(
+      Effect.catch((error) =>
+        !options.enableBroadcast && isTransientSendError(error)
+          ? Console.log(
+              `  ↻ ${getErrnoCode(error) ?? "error"}, retrying via broadcast ${fallbackBroadcastIp}...`,
+            ).pipe(
+              Effect.andThen(
+                retryTransient(
+                  () =>
+                    sendUdp({
+                      ...options,
+                      targetIp: fallbackBroadcastIp,
+                      enableBroadcast: true,
+                    }),
+                  6,
+                ),
               ),
-            ),
-          )
-        : Effect.fail(error),
-    ),
-  );
+            )
+          : Effect.fail(error),
+      ),
+    );
+
+export const validateExpectedResponse = (
+  message: string,
+  expectedResponse: ExpectedResponse | undefined,
+  responses: ReadonlyArray<Pick<UdpResponse, "text">>,
+) => {
+  if (
+    responses.length === 0 ||
+    (expectedResponse !== undefined &&
+      !responses.some((response) => expectedResponse.matches(response.text)))
+  ) {
+    throw new Error(
+      buildPairFailedMessage(message, expectedResponse, responses),
+    );
+  }
+};
 
 const runPair = (options: PairOptions) =>
   Effect.gen(function* () {
@@ -184,6 +204,7 @@ const runPair = (options: PairOptions) =>
       : Console.log(
           "Could not infer a local Wi-Fi IP from the S20 subnet, falling back to 0.0.0.0\n",
         );
+    const sendUdpWithBroadcastFallback = createSendUdpWithBroadcastFallback();
 
     const sendWithValidation = (
       message: string,
@@ -215,19 +236,14 @@ const runPair = (options: PairOptions) =>
           );
         }
 
-        if (
-          expectResponse &&
-          (responses.length === 0 ||
-            (expectedResponse !== undefined &&
-              !responses.some((response) =>
-                expectedResponse.matches(response.text),
-              )))
-        ) {
-          return yield* Effect.fail(
-            new Error(
-              buildPairFailedMessage(message, expectedResponse, responses),
-            ),
-          );
+        if (expectResponse) {
+          try {
+            validateExpectedResponse(message, expectedResponse, responses);
+          } catch (error) {
+            return yield* Effect.fail(
+              error instanceof Error ? error : new Error(String(error)),
+            );
+          }
         }
       });
 

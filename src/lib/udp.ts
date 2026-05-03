@@ -2,7 +2,7 @@ import * as dgram from "node:dgram";
 
 import { Effect } from "effect";
 
-type UdpResponse = {
+export type UdpResponse = {
   readonly ip: string;
   readonly port: number;
   readonly text: string;
