@@ -5,7 +5,7 @@ import {
   findLocalBindIpFromInterfaces,
   isIpv4OnSameNetwork,
 } from "../src/lib/network.ts";
-import { parseDiscoveryReply, isDeviceReply } from "../src/lib/s20.ts";
+import { isDeviceReply, parseDiscoveryReply } from "../src/lib/s20.ts";
 import { shouldUseBroadcastFallback } from "../src/lib/udp.ts";
 
 void test("parseDiscoveryReply parses a valid device response", () => {

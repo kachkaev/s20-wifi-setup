@@ -3,26 +3,27 @@ import { Command, Flag } from "effect/unstable/cli";
 
 import { findLocalBindIp } from "../lib/network.ts";
 import {
-  DEFAULT_BROADCAST_IP,
-  DEFAULT_RESPONSE_TIMEOUT_MS,
-  DEFAULT_TARGET_PORT,
   buildDiscoveryFailedMessage,
+  defaultBroadcastIp,
+  defaultResponseTimeoutMs,
+  defaultTargetPort,
   parseDiscoveryReply,
 } from "../lib/s20.ts";
 import {
+  getErrnoCode,
   isTransientSendError,
-  sendUdpOnce,
   type SendOptions,
+  sendUdpOnce,
 } from "../lib/udp.ts";
 
-interface PairOptions {
+type PairOptions = {
   readonly ssid: string;
-  readonly password: Redacted.Redacted<string>;
+  readonly password: Redacted.Redacted;
   readonly targetIp: string | undefined;
   readonly broadcastIp: string;
   readonly targetPort: number;
   readonly timeoutMs: number;
-}
+};
 
 const formatUdpLine = (ip: string, port: number, text: string) =>
   `  <- ${ip}:${String(port)} ${text}`;
@@ -35,7 +36,7 @@ const retryTransient = <A, R>(
     Effect.catch((error) =>
       remaining > 0 && isTransientSendError(error)
         ? Console.log(
-            `  ↻ ${(error as NodeJS.ErrnoException).code ?? "error"}, retrying...`,
+            `  ↻ ${getErrnoCode(error) ?? "error"}, retrying...`,
           ).pipe(
             Effect.andThen(Effect.sleep("200 millis")),
             Effect.andThen(retryTransient(effectFactory, remaining - 1)),
@@ -87,7 +88,14 @@ const discoverDevice = (
       );
     }
 
-    const firstReply = parsedReplies[0]!;
+    const [firstReply] = parsedReplies;
+
+    if (firstReply === undefined) {
+      return yield* Effect.fail(
+        new Error(buildDiscoveryFailedMessage(broadcastIp, targetPort)),
+      );
+    }
+
     yield* Console.log(
       `Found S20: ip=${firstReply.ip} mac=${firstReply.mac} module=${firstReply.module}\n`,
     );
@@ -103,7 +111,7 @@ const sendUdpWithBroadcastFallback = (
     Effect.catch((error) =>
       !options.enableBroadcast && isTransientSendError(error)
         ? Console.log(
-            `  ↻ ${(error as NodeJS.ErrnoException).code ?? "error"}, retrying via broadcast ${fallbackBroadcastIp}...`,
+            `  ↻ ${getErrnoCode(error) ?? "error"}, retrying via broadcast ${fallbackBroadcastIp}...`,
           ).pipe(
             Effect.andThen(
               retryTransient(
@@ -140,17 +148,15 @@ const runPair = (options: PairOptions) =>
       yield* Console.log(`Using --target-ip override: ${options.targetIp}\n`);
     }
 
-    if (localBindIp) {
-      yield* Console.log(`Using local Wi-Fi IP: ${localBindIp}\n`);
-    } else {
-      yield* Console.log(
-        "Could not infer a local Wi-Fi IP from the S20 subnet, falling back to 0.0.0.0\n",
-      );
-    }
+    yield* localBindIp
+      ? Console.log(`Using local Wi-Fi IP: ${localBindIp}\n`)
+      : Console.log(
+          "Could not infer a local Wi-Fi IP from the S20 subnet, falling back to 0.0.0.0\n",
+        );
 
     const send = (message: string, expectResponse = true) =>
       Effect.gen(function* () {
-        yield* Console.log(`  -> ${message.replace(/\r$/, "\\r")}`);
+        yield* Console.log(`  -> ${message.replace(/\r$/, String.raw`\r`)}`);
 
         const responses = yield* sendUdpWithBroadcastFallback(
           {
@@ -219,17 +225,17 @@ export const pairCommand = Command.make("pair", {
     ),
   ),
   broadcastIp: Flag.string("broadcast-ip").pipe(
-    Flag.withDefault(DEFAULT_BROADCAST_IP),
+    Flag.withDefault(defaultBroadcastIp),
     Flag.withDescription("Subnet broadcast address used for discovery"),
     Flag.withFallbackConfig(Config.string("S20_BROADCAST_IP")),
   ),
   targetPort: Flag.integer("target-port").pipe(
-    Flag.withDefault(DEFAULT_TARGET_PORT),
+    Flag.withDefault(defaultTargetPort),
     Flag.withDescription("S20 UDP control port"),
     Flag.withFallbackConfig(Config.int("S20_TARGET_PORT")),
   ),
   timeoutMs: Flag.integer("timeout-ms").pipe(
-    Flag.withDefault(DEFAULT_RESPONSE_TIMEOUT_MS),
+    Flag.withDefault(defaultResponseTimeoutMs),
     Flag.withDescription("How long to wait for each response / discovery"),
   ),
 }).pipe(
@@ -240,10 +246,7 @@ export const pairCommand = Command.make("pair", {
     runPair({
       ssid: config.ssid,
       password: config.password,
-      targetIp: Option.match(config.targetIp, {
-        onSome: (value) => value,
-        onNone: () => undefined,
-      }),
+      targetIp: Option.getOrUndefined(config.targetIp),
       broadcastIp: config.broadcastIp,
       targetPort: config.targetPort,
       timeoutMs: config.timeoutMs,

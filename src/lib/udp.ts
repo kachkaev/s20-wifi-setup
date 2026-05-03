@@ -2,13 +2,13 @@ import * as dgram from "node:dgram";
 
 import { Effect } from "effect";
 
-interface UdpResponse {
+type UdpResponse = {
   readonly ip: string;
   readonly port: number;
   readonly text: string;
-}
+};
 
-export interface SendOptions {
+export type SendOptions = {
   readonly message: string;
   readonly targetIp: string;
   readonly targetPort: number;
@@ -17,10 +17,13 @@ export interface SendOptions {
   readonly expectResponse: boolean;
   readonly finishOnFirstReply: boolean;
   readonly timeoutMs: number;
-}
+};
+
+export const getErrnoCode = (error: Error) =>
+  "code" in error && typeof error.code === "string" ? error.code : undefined;
 
 export const isTransientSendError = (err: Error) => {
-  const code = (err as NodeJS.ErrnoException).code;
+  const code = getErrnoCode(err);
   return code === "EHOSTUNREACH" || code === "ENETUNREACH";
 };
 
@@ -30,16 +33,14 @@ export const shouldUseBroadcastFallback = (
 ) => !enableBroadcast && isTransientSendError(err);
 
 export const sendUdpOnce = (options: SendOptions) =>
-  Effect.callback<ReadonlyArray<UdpResponse>, Error>((resume) => {
+  Effect.callback<readonly UdpResponse[], Error>((resume) => {
     const socket = dgram.createSocket("udp4");
     const responses: UdpResponse[] = [];
     let timer: NodeJS.Timeout | undefined;
     let boundAddress: string | undefined;
     let settled = false;
 
-    const finish = (
-      effect: Effect.Effect<ReadonlyArray<UdpResponse>, Error>,
-    ) => {
+    const finish = (effect: Effect.Effect<readonly UdpResponse[], Error>) => {
       if (settled) {
         return;
       }

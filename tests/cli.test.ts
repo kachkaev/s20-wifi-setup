@@ -1,15 +1,16 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 const rootDirectory = fileURLToPath(new URL("../", import.meta.url));
 
-const runCli = (...args: ReadonlyArray<string>) =>
-  spawnSync(process.execPath, ["src/cli.ts", ...args], {
+function runCli(...args: readonly string[]) {
+  return spawnSync(process.execPath, ["src/cli.ts", ...args], {
     cwd: rootDirectory,
     encoding: "utf8",
   });
+}
 
 void test("root help lists the available subcommands", () => {
   const result = runCli("--help");

@@ -3,22 +3,24 @@ import test from "node:test";
 
 import {
   buildPlatformDiagnoseSteps,
+  type DiagnoseStep,
   resolveDiagnoseOptions,
   resolveDiagnoseStepAvailability,
-  type DiagnoseStep,
 } from "../src/lib/diagnose.ts";
 
-const makeRawDiagnoseOptions = () => ({
-  interfaceName: undefined,
-  targetIp: "10.10.100.254",
-  gatewayIp: "10.10.100.1",
-  broadcastIp: "10.10.100.255",
-  targetPort: 48_899,
-  probeTimeoutMs: 3_000,
-  captureSeconds: 4,
-  reportPath: "/tmp/s20-diag.txt",
-  capturePath: "/tmp/s20-tcpdump.txt",
-});
+function makeRawDiagnoseOptions() {
+  return {
+    interfaceName: undefined,
+    targetIp: "10.10.100.254",
+    gatewayIp: "10.10.100.1",
+    broadcastIp: "10.10.100.255",
+    targetPort: 48_899,
+    probeTimeoutMs: 3000,
+    captureSeconds: 4,
+    reportPath: "/tmp/s20-diag.txt",
+    capturePath: "/tmp/s20-tcpdump.txt",
+  };
+}
 
 void test("resolveDiagnoseOptions defaults to en0 on macOS", () => {
   const resolved = resolveDiagnoseOptions(makeRawDiagnoseOptions(), "darwin");

@@ -1,5 +1,5 @@
-import * as os from "node:os";
 import { writeFile } from "node:fs/promises";
+import * as os from "node:os";
 
 import { Console, Effect } from "effect";
 
@@ -11,25 +11,25 @@ import {
   type SupportedPlatform,
 } from "./network.ts";
 import {
+  type CapturedCommandResult,
   commandExists,
   runCapturedCommand,
   runInteractiveCommand,
   startCapturedCommand,
-  type CapturedCommandResult,
 } from "./process.ts";
 import {
-  DEFAULT_BROADCAST_IP,
-  DEFAULT_CAPTURE_PATH,
-  DEFAULT_GATEWAY_IP,
-  DEFAULT_REPORT_PATH,
-  DEFAULT_RESPONSE_TIMEOUT_MS,
-  DEFAULT_TARGET_IP,
-  DEFAULT_TARGET_PORT,
-  DISCOVERY_MESSAGE,
+  defaultBroadcastIp,
+  defaultCapturePath,
+  defaultGatewayIp,
+  defaultReportPath,
+  defaultResponseTimeoutMs,
+  defaultTargetIp,
+  defaultTargetPort,
+  discoveryMessage,
 } from "./s20.ts";
 import { sendUdpOnce } from "./udp.ts";
 
-interface RawDiagnoseOptions {
+type RawDiagnoseOptions = {
   readonly interfaceName: string | undefined;
   readonly targetIp: string;
   readonly gatewayIp: string;
@@ -39,32 +39,32 @@ interface RawDiagnoseOptions {
   readonly captureSeconds: number;
   readonly reportPath: string;
   readonly capturePath: string;
-}
+};
 
-interface DiagnoseOptions extends RawDiagnoseOptions {
+type DiagnoseOptions = RawDiagnoseOptions & {
   readonly platform: SupportedPlatform;
-}
+};
 
-interface Reporter {
+type Reporter = {
   readonly line: (text?: string) => Effect.Effect<void>;
   readonly section: (title: string) => Effect.Effect<void>;
   readonly flush: () => Effect.Effect<void, Error>;
-}
+};
 
-interface DiagnoseStepCommand {
+type DiagnoseStepCommand = {
   readonly kind: "command";
   readonly header: string;
   readonly command: string;
-  readonly args: ReadonlyArray<string>;
-  readonly requiredCommands: ReadonlyArray<string>;
+  readonly args: readonly string[];
+  readonly requiredCommands: readonly string[];
   readonly transformOutput?: (result: CapturedCommandResult) => string;
-}
+};
 
-interface DiagnoseStepSkip {
+type DiagnoseStepSkip = {
   readonly kind: "skip";
   readonly header: string;
   readonly reason: string;
-}
+};
 
 export type DiagnoseStep = DiagnoseStepCommand | DiagnoseStepSkip;
 
@@ -177,8 +177,7 @@ const createReporter = (reportPath: string): Reporter => {
         yield* Console.log("");
         yield* Console.log(`### ${title} ###`);
         yield* Effect.sync(() => {
-          lines.push("");
-          lines.push(`### ${title} ###`);
+          lines.push("", `### ${title} ###`);
         });
       }),
     flush: () =>
@@ -224,24 +223,24 @@ export const resolveDiagnoseOptions = (
       supportedPlatform,
       input.interfaceName,
     ),
-    targetIp: input.targetIp || DEFAULT_TARGET_IP,
-    gatewayIp: input.gatewayIp || DEFAULT_GATEWAY_IP,
-    broadcastIp: input.broadcastIp || DEFAULT_BROADCAST_IP,
-    targetPort: Math.max(1, input.targetPort || DEFAULT_TARGET_PORT),
+    targetIp: input.targetIp || defaultTargetIp,
+    gatewayIp: input.gatewayIp || defaultGatewayIp,
+    broadcastIp: input.broadcastIp || defaultBroadcastIp,
+    targetPort: Math.max(1, input.targetPort || defaultTargetPort),
     probeTimeoutMs: Math.max(
       1,
-      input.probeTimeoutMs || DEFAULT_RESPONSE_TIMEOUT_MS,
+      input.probeTimeoutMs || defaultResponseTimeoutMs,
     ),
     captureSeconds: Math.max(1, input.captureSeconds || 4),
-    reportPath: input.reportPath || DEFAULT_REPORT_PATH,
-    capturePath: input.capturePath || DEFAULT_CAPTURE_PATH,
+    reportPath: input.reportPath || defaultReportPath,
+    capturePath: input.capturePath || defaultCapturePath,
     platform: supportedPlatform,
   };
 };
 
 export const buildPlatformDiagnoseSteps = (
   options: DiagnoseOptions,
-): ReadonlyArray<DiagnoseStep> => {
+): readonly DiagnoseStep[] => {
   if (options.platform === "darwin") {
     return [
       options.interfaceName
@@ -364,10 +363,13 @@ export const buildPlatformDiagnoseSteps = (
   ];
 };
 
-const collectAvailableCommands = (commands: ReadonlyArray<string>) =>
+const collectAvailableCommands = (commands: readonly string[]) =>
   Effect.forEach(commands, (command) =>
     commandExists(command).pipe(
-      Effect.map((exists) => [command, exists] as const),
+      Effect.map((exists) => {
+        const entry: readonly [string, boolean] = [command, exists];
+        return entry;
+      }),
     ),
   ).pipe(Effect.map((entries) => Object.fromEntries(entries)));
 
@@ -537,7 +539,7 @@ const probeUdp = (
 
     try {
       const responses = yield* sendUdpOnce({
-        message: DISCOVERY_MESSAGE,
+        message: discoveryMessage,
         targetIp,
         targetPort: options.targetPort,
         localBindIp,
@@ -548,7 +550,7 @@ const probeUdp = (
       });
 
       return [
-        `[${label}] sent ${DISCOVERY_MESSAGE} -> ${targetIp}:${String(options.targetPort)}`,
+        `[${label}] sent ${discoveryMessage} -> ${targetIp}:${String(options.targetPort)}`,
         ...(responses.length === 0
           ? [`[${label}] (no replies)`]
           : responses.map(
@@ -597,7 +599,7 @@ const runNodeSnapshot = (options: DiagnoseOptions, reporter: Reporter) =>
           matchingAddress,
           networkInterfaces,
         },
-        null,
+        undefined,
         2,
       ),
     );
@@ -666,7 +668,7 @@ export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
             "-l",
             `udp port ${String(options.targetPort)} or arp`,
           ],
-          { timeoutMs: options.captureSeconds * 1_000 },
+          { timeoutMs: options.captureSeconds * 1000 },
         );
 
         captureStopper = capture.stop;
@@ -683,11 +685,11 @@ export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
     } else {
       yield* reporter.section("starting tcpdump");
       yield* reporter.line(
-        !sudoValidated
-          ? "Skipped: sudo credentials were not validated"
-          : !availableCommands["tcpdump"]
-            ? "Skipped: missing command tcpdump"
-            : "Skipped: no interface selected",
+        sudoValidated
+          ? availableCommands["tcpdump"]
+            ? "Skipped: no interface selected"
+            : "Skipped: missing command tcpdump"
+          : "Skipped: sudo credentials were not validated",
       );
     }
 
@@ -719,11 +721,11 @@ export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
   });
 
 export {
-  DEFAULT_BROADCAST_IP,
-  DEFAULT_CAPTURE_PATH,
-  DEFAULT_GATEWAY_IP,
-  DEFAULT_REPORT_PATH,
-  DEFAULT_RESPONSE_TIMEOUT_MS,
-  DEFAULT_TARGET_IP,
-  DEFAULT_TARGET_PORT,
-};
+  defaultBroadcastIp,
+  defaultCapturePath,
+  defaultGatewayIp,
+  defaultReportPath,
+  defaultResponseTimeoutMs,
+  defaultTargetIp,
+  defaultTargetPort,
+} from "./s20.ts";

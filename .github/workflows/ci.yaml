@@ -112,18 +112,6 @@ jobs:
             exit 1
           fi
 
-      - name: Run pnpm test
-        if: ${{ success() || failure() }}
-        run: |
-          if ! pnpm test; then
-            echo ''
-            echo ''
-            echo 'ℹ️ ℹ️ ℹ️'
-            echo 'Please fix the above test failures locally for the check to pass.'
-            echo 'ℹ️ ℹ️ ℹ️'
-            exit 1
-          fi
-
       - name: Run pnpm lint:tsc
         if: ${{ success() || failure() }}
         run: |
@@ -133,6 +121,18 @@ jobs:
             echo 'ℹ️ ℹ️ ℹ️'
             echo 'Please fix the above errors locally for the check to pass.'
             echo 'If you don’t see them, try merging target branch into yours.'
+            echo 'ℹ️ ℹ️ ℹ️'
+            exit 1
+          fi
+
+      - name: Run pnpm test
+        if: ${{ success() || failure() }}
+        run: |
+          if ! pnpm test; then
+            echo ''
+            echo ''
+            echo 'ℹ️ ℹ️ ℹ️'
+            echo 'Please fix the above test failures locally for the check to pass.'
             echo 'ℹ️ ℹ️ ℹ️'
             exit 1
           fi

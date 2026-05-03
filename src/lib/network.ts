@@ -16,13 +16,21 @@ export const getSupportedPlatform = (
   return "other";
 };
 
-const ipv4ToInt = (ip: string) =>
-  ip.split(".").reduce((acc, part) => {
+const ipv4ToInt = (ip: string) => {
+  let result = 0;
+
+  for (const part of ip.split(".")) {
     const octet = Number(part);
-    return Number.isInteger(octet) && octet >= 0 && octet <= 255
-      ? (acc << 8) | octet
-      : Number.NaN;
-  }, 0);
+
+    if (!Number.isInteger(octet) || octet < 0 || octet > 255) {
+      return Number.NaN;
+    }
+
+    result = (result << 8) | octet;
+  }
+
+  return result;
+};
 
 export const isIpv4OnSameNetwork = (
   candidateIp: string,
@@ -58,7 +66,7 @@ export const findLocalBindIpFromInterfaces = (
     }
   }
 
-  return undefined;
+  return;
 };
 
 export const findLocalBindIp = (candidateIp: string) =>

@@ -2,21 +2,21 @@ import { spawn } from "node:child_process";
 
 import { Effect } from "effect";
 
-export interface CapturedCommandResult {
+export type CapturedCommandResult = {
   readonly command: string;
-  readonly args: ReadonlyArray<string>;
+  readonly args: readonly string[];
   readonly stdout: string;
   readonly stderr: string;
   readonly combined: string;
   readonly exitCode: number;
   readonly signal: NodeJS.Signals | null;
-}
+};
 
-interface RunningCommandCapture {
+type RunningCommandCapture = {
   readonly stop: () => Effect.Effect<CapturedCommandResult, Error>;
-}
+};
 
-const chunksToString = (chunks: ReadonlyArray<Buffer>) =>
+const chunksToString = (chunks: readonly Buffer[]) =>
   Buffer.concat(chunks).toString("utf8");
 
 export const commandExists = (command: string) =>
@@ -46,7 +46,7 @@ export const commandExists = (command: string) =>
 
 export const runCapturedCommand = (
   command: string,
-  args: ReadonlyArray<string>,
+  args: readonly string[],
   options?: {
     readonly stdin?: "ignore" | "inherit";
   },
@@ -91,7 +91,7 @@ export const runCapturedCommand = (
 
 export const runInteractiveCommand = (
   command: string,
-  args: ReadonlyArray<string>,
+  args: readonly string[],
 ) =>
   Effect.promise<number>(
     () =>
@@ -112,7 +112,7 @@ export const runInteractiveCommand = (
 
 export const startCapturedCommand = (
   command: string,
-  args: ReadonlyArray<string>,
+  args: readonly string[],
   options?: {
     readonly stdin?: "ignore" | "inherit";
     readonly timeoutMs?: number;

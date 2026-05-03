@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
-import { Command } from "effect/unstable/cli";
 import { Effect } from "effect";
+import { Command } from "effect/unstable/cli";
 
-import { diagnoseCommand } from "./commands/diagnose.ts";
 import packageJson from "../package.json" with { type: "json" };
+import { diagnoseCommand } from "./commands/diagnose.ts";
 import { pairCommand } from "./commands/pair.ts";
 
 const cli = Command.make("s20-wifi-pairing").pipe(
