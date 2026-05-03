@@ -5,6 +5,10 @@ export default defineConfig([
   ...generateBaseConfigs({ tsconfigRootDir: import.meta.dirname }),
 
   {
+    ignores: [".husky/**"],
+  },
+
+  {
     files: ["src/**/*.ts"],
     rules: {
       "@typescript-eslint/explicit-module-boundary-types": "off", // Effect-heavy APIs infer large Effect<Success, Error, Requirements> signatures; repeating them adds noise.

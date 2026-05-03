@@ -40,6 +40,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Debug publish context
+        run: |
+          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "GITHUB_WORKFLOW=$GITHUB_WORKFLOW"
+          echo "RUNNER_OS=$RUNNER_OS"
+          echo "CI=$CI"
+          node -v
+          npm -v
+          pnpm -v
+          echo "npm registry: $(npm config get registry)"
+          node -e 'const packageJson = require("./package.json"); console.log(JSON.stringify({ name: packageJson.name, version: packageJson.version, publishConfig: packageJson.publishConfig, repository: packageJson.repository }, null, 2));'
+          if [ -f "$HOME/.npmrc" ]; then
+            echo "~/.npmrc exists before changesets/action"
+            sed -E 's#//registry.npmjs.org/:_authToken=.*#//registry.npmjs.org/:_authToken=<redacted>#' "$HOME/.npmrc"
+          else
+            echo "~/.npmrc does not exist before changesets/action"
+          fi
+
       - name: Create release pull request or publish to npm
         id: changesets
         uses: changesets/action@c48e67d110a68bc90ccf1098e9646092baacaa87 # v1.6.0
