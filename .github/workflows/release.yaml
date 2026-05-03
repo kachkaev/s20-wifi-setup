@@ -60,12 +60,25 @@ jobs:
             echo "~/.npmrc does not exist before changesets/action"
           fi
 
-      - name: Create release pull request or publish to npm
+      - name: Create release pull request or prepare publish
         id: changesets
         uses: changesets/action@c48e67d110a68bc90ccf1098e9646092baacaa87 # v1.6.0
         with:
-          publish: pnpm changesets:publish
           title: Version packages
           version: pnpm changesets:version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Debug npm auth context after changesets/action
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        run: |
+          if [ -f "$HOME/.npmrc" ]; then
+            echo "~/.npmrc exists after changesets/action"
+            sed -E 's#//registry.npmjs.org/:_authToken=.*#//registry.npmjs.org/:_authToken=<redacted>#' "$HOME/.npmrc"
+          else
+            echo "~/.npmrc does not exist after changesets/action"
+          fi
+
+      - name: Publish to npm
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        run: pnpm changesets:publish
