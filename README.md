@@ -1,11 +1,21 @@
 # s20-wifi-pairing
 
-Pair an [Orvibo Wiwo S20](https://www.orvibo.com/) smart plug with a Wi-Fi network from the command line.
+Pair an [Orvibo](https://www.orvibo.com/) Wiwo S20 smart plug with a Wi-Fi network from the command line.
 
-This repo exists for a specific problem: the original Wiwo mobile app is gone, but the plugs still work.
+The original Wiwo mobile app is gone, but the plugs still work.
 This CLI reproduces the UDP pairing flow used by the app and adds a few practical fixes for modern macOS and Linux hosts.
 
-## What It Does
+If your plug looks like this this project may be relevant:
+
+![Orvibo Wiwo S20 smart plug](docs/images/orvibo-wiwo-s20-light-blue.png)
+
+## Safety
+
+[Home Assistant's Orvibo integration page](https://www.home-assistant.io/integrations/orvibo/) carries a caution for the European ORVIBO Wi-Fi SMART SOCKET S20 (`LGS-20`) and links to the [RAPEX recall entry](https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10002910).
+The reason is electrical safety rather than software support: the recall notes that live plug pins could remain accessible while the socket is being inserted, and that the unit lacks protective earth continuity even though it can accept appliances that require grounding.
+Treat this repo as a way to pair hardware you already own, not as a recommendation to buy or continue using a recalled variant without making your own safety assessment first.
+
+## What the tool does
 
 The plug starts in AP mode and exposes a Wi-Fi network such as `WiWo-S20`.
 Once your laptop is connected to that network, the CLI can:
@@ -58,7 +68,7 @@ npx s20-wifi-pairing@latest pair \
   --target-ip 10.10.100.254
 ```
 
-Collect diagnostics:
+If anything goes wrong, collect diagnostics and consult an LLM of your choice:
 
 ```sh
 npx s20-wifi-pairing@latest diagnose
@@ -71,7 +81,7 @@ By default, `diagnose` writes:
 
 It may prompt for `sudo` so it can clear stale ARP state and run `tcpdump`.
 
-## Pair Flags
+## Pair flags
 
 | Flag             | Env var            | Default         |
 | ---------------- | ------------------ | --------------- |
@@ -126,3 +136,8 @@ Useful commands:
 - `pnpm lint` runs cspell, eslint, knip, markdownlint, pnpm dedupe, prettier, and TypeScript checks.
 - `pnpm test` runs the hardware-free regression suite with built-in `node:test`.
 - `pnpm fix` applies the available autofixes.
+
+## Credits
+
+This project was inspired by [darrensteele/s20](https://github.com/darrensteele/s20), a Python tool for pairing Orvibo S20 plugs.
+That tool helped confirm the basic UDP pairing flow, even though it did not work on my setup without further changes.
