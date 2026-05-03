@@ -12,13 +12,13 @@
     "cli",
     "effect"
   ],
-  "homepage": "https://github.com/kachkaev/s20-wifi-pairing#readme",
+  "homepage": "https://github.com/kachkaev/s20-wifi-setup#readme",
   "bugs": {
-    "url": "https://github.com/kachkaev/s20-wifi-pairing/issues"
+    "url": "https://github.com/kachkaev/s20-wifi-setup/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kachkaev/s20-wifi-pairing.git"
+    "url": "https://github.com/kachkaev/s20-wifi-setup.git"
   },
   "license": "BSD-3-Clause",
   "author": {

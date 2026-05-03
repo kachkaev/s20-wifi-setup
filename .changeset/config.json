@@ -4,7 +4,7 @@
   "baseBranch": "main",
   "changelog": [
     "@changesets/changelog-github",
-    { "repo": "kachkaev/s20-wifi-pairing" }
+    { "repo": "kachkaev/s20-wifi-setup" }
   ],
   "commit": false,
   "fixed": [],

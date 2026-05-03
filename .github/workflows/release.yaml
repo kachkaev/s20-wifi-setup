@@ -14,7 +14,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    if: github.repository == 'kachkaev/s20-wifi-pairing'
+    if: github.repository == 'kachkaev/s20-wifi-setup'
     name: Release
     permissions:
       contents: write
