@@ -8,7 +8,7 @@ import packageJson from "../package.json" with { type: "json" };
 import { diagnoseCommand } from "./commands/diagnose.ts";
 import { pairCommand } from "./commands/pair.ts";
 
-const cli = Command.make("s20-wifi-pairing").pipe(
+const cli = Command.make("s20-wifi-setup").pipe(
   Command.withDescription(
     "Pair and diagnose Orvibo Wiwo S20 smart plugs from the command line",
   ),

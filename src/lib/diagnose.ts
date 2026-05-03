@@ -626,7 +626,7 @@ export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
 
     yield* reporter.line("==================================================");
     yield* reporter.line(
-      ` s20-wifi-pairing diagnostic - ${new Date().toString()}`,
+      ` s20-wifi-setup diagnostic - ${new Date().toString()}`,
     );
     yield* reporter.line("==================================================");
 

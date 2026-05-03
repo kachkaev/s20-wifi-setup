@@ -1,5 +1,5 @@
 {
-  "name": "s20-wifi-pairing",
+  "name": "s20-wifi-setup",
   "version": "0.1.0",
   "description": "Pair an Orvibo Wiwo S20 smart plug with a Wi-Fi network from the command line",
   "keywords": [
@@ -9,7 +9,8 @@
     "smart-plug",
     "wifi",
     "pairing",
-    "cli"
+    "cli",
+    "effect"
   ],
   "homepage": "https://github.com/kachkaev/s20-wifi-pairing#readme",
   "bugs": {
@@ -27,7 +28,7 @@
   },
   "type": "module",
   "bin": {
-    "s20-wifi-pairing": "./src/cli.ts"
+    "s20-wifi-setup": "./src/cli.ts"
   },
   "files": [
     "LICENSE.md",

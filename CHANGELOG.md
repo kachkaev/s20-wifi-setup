@@ -1,4 +1,4 @@
-# s20-wifi-pairing
+# s20-wifi-setup
 
 ## 0.1.0
 

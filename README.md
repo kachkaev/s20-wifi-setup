@@ -1,4 +1,4 @@
-# s20-wifi-pairing
+# s20-wifi-setup
 
 Pair an [Orvibo](https://www.orvibo.com/) Wiwo S20 smart plug with a Wi-Fi network from the command line.
 
@@ -41,20 +41,20 @@ This package executes `.ts` files directly, so the Node 24+ requirement is inten
 Run help:
 
 ```sh
-npx s20-wifi-pairing@latest --help
+npx s20-wifi-setup@latest --help
 ```
 
 Pair a plug:
 
 ```sh
 WIFI_SSID="MyWifi" WIFI_PASSWORD="super-secret" \
-  npx s20-wifi-pairing@latest pair
+  npx s20-wifi-setup@latest pair
 ```
 
 or:
 
 ```sh
-npx s20-wifi-pairing@latest pair \
+npx s20-wifi-setup@latest pair \
   --ssid "MyWifi" \
   --password "super-secret"
 ```
@@ -62,7 +62,7 @@ npx s20-wifi-pairing@latest pair \
 If your plug uses a different AP-mode IP than the default, skip discovery:
 
 ```sh
-npx s20-wifi-pairing@latest pair \
+npx s20-wifi-setup@latest pair \
   --ssid "MyWifi" \
   --password "super-secret" \
   --target-ip 10.10.100.254
@@ -71,7 +71,7 @@ npx s20-wifi-pairing@latest pair \
 If anything goes wrong, collect diagnostics and consult an LLM of your choice:
 
 ```sh
-npx s20-wifi-pairing@latest diagnose
+npx s20-wifi-setup@latest diagnose
 ```
 
 By default, `diagnose` writes:
@@ -115,7 +115,7 @@ It may prompt for `sudo` so it can clear stale ARP state and run `tcpdump`.
 - If pairing still fails, run:
 
 ```sh
-npx s20-wifi-pairing@latest diagnose
+npx s20-wifi-setup@latest diagnose
 ```
 
 That collects route state, interface state, UDP probes, and a `tcpdump` capture to help debug what the host OS is doing on the AP network.
