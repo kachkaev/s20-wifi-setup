@@ -27,14 +27,15 @@
   },
   "type": "module",
   "bin": {
-    "s20-wifi-pairing": "./scripts/s20-pairing.script.ts"
+    "s20-wifi-pairing": "./src/cli.ts"
   },
   "files": [
     "LICENSE.md",
     "README.md",
-    "scripts/"
+    "src/"
   ],
   "scripts": {
+    "diagnose": "node src/cli.ts diagnose",
     "fix": "npm-run-all --continue-on-error \"fix:*\"",
     "fix:eslint": "eslint --max-warnings=0 --fix",
     "fix:knip": "knip --fix",
@@ -49,8 +50,9 @@
     "lint:pnpm-dedupe": "pnpm dedupe --check",
     "lint:prettier": "prettier --check .",
     "lint:tsc": "tsc --noEmit",
-    "pair": "node scripts/s20-pairing.script.ts",
-    "prepare": "husky"
+    "pair": "node src/cli.ts pair",
+    "prepare": "husky",
+    "test": "node --test tests/*.test.ts"
   },
   "lint-staged": {
     "**": [
@@ -59,8 +61,8 @@
   },
   "prettier": "@kachkaev/prettier-config",
   "dependencies": {
-    "@effect/platform-node": "4.0.0-beta.56",
-    "effect": "4.0.0-beta.57"
+    "@effect/platform-node": "4.0.0-beta.59",
+    "effect": "4.0.0-beta.59"
   },
   "devDependencies": {
     "@kachkaev/eslint-config-base": "1.1.1",

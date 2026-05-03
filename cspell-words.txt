@@ -15,6 +15,7 @@ IPs
 kachkaev
 Kachkaev
 knip
+LPB
 LLINFO
 macOS
 manypkg

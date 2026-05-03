@@ -1,71 +1,77 @@
 # s20-wifi-pairing
 
-Pair an [Orvibo Wiwo S20](https://www.orvibo.com/) smart plug with a Wi-Fi
-network from the command line.
+Pair an [Orvibo Wiwo S20](https://www.orvibo.com/) smart plug with a Wi-Fi network from the command line.
 
-This repo exists for a very specific problem: the original Wiwo mobile app is
-long gone, but the plugs still work. The script here reproduces the UDP pairing
-flow used by the app, with a few practical fixes for modern macOS networking.
+This repo exists for a specific problem: the original Wiwo mobile app is gone, but the plugs still work.
+This CLI reproduces the UDP pairing flow used by the app and adds a few practical fixes for modern macOS and Linux hosts.
 
 ## What It Does
 
-The plug starts in AP mode and exposes a Wi-Fi network such as `WiWo-S20`. Once
-your laptop is connected to that network, the script:
+The plug starts in AP mode and exposes a Wi-Fi network such as `WiWo-S20`.
+Once your laptop is connected to that network, the CLI can:
 
-1.  broadcasts `HF-A11ASSISTHREAD` to discover the plug,
-1.  reads the plug IP from the reply,
-1.  sends the handshake and AT commands that configure the target SSID and
-    password,
-1.  reboots the plug so it joins your normal network.
+1.  discover the plug via UDP broadcast,
+1.  configure the target SSID and password with the same AP-mode commands as the original app,
+1.  reboot the plug so it joins your normal network,
+1.  collect a diagnostic report if pairing fails.
 
-It also handles a macOS-specific failure mode where broadcast discovery works,
-but the OS refuses unicast sends to `10.10.100.254` with `EHOSTUNREACH`. In
-that case, the script falls back to subnet broadcast for the rest of the
-pairing session.
+It also handles a macOS-specific failure mode where broadcast discovery works, but the OS refuses unicast sends to `10.10.100.254` with `EHOSTUNREACH`.
+In that case, the pairing flow falls back to subnet broadcast automatically.
 
 ## Requirements
 
 - Node 24+.
-- `pnpm`.
 - A laptop connected directly to the plug's AP-mode Wi-Fi network.
 - No active VPN while pairing.
 
-## Install
+This package executes `.ts` files directly, so the Node 24+ requirement is intentional.
+
+## Usage
+
+Run help:
 
 ```sh
-pnpm install
+npx s20-wifi-pairing@latest --help
 ```
 
-## Pair A Plug
-
-1.  Hold the plug button until the LED flashes blue.
-1.  Join the `WiWo-S20` Wi-Fi network from your laptop.
-1.  Run:
+Pair a plug:
 
 ```sh
-WIFI_SSID="MyWifi" WIFI_PASSWORD="super-secret" node scripts/s20-pairing.script.ts
+WIFI_SSID="MyWifi" WIFI_PASSWORD="super-secret" \
+  npx s20-wifi-pairing@latest pair
 ```
-
-**Tip:** Add a space before the command so that it does not add to your shell history.
-That way you can avoid accidentally leaking your Wi-Fi password in a future `history` review.
 
 or:
 
 ```sh
-pnpm pair -- --ssid "MyWifi" --password "super-secret"
+npx s20-wifi-pairing@latest pair \
+  --ssid "MyWifi" \
+  --password "super-secret"
 ```
 
-If your plug uses a different AP-mode IP than the default, skip discovery and
-force a target:
+If your plug uses a different AP-mode IP than the default, skip discovery:
 
 ```sh
-node scripts/s20-pairing.script.ts \
+npx s20-wifi-pairing@latest pair \
   --ssid "MyWifi" \
   --password "super-secret" \
   --target-ip 10.10.100.254
 ```
 
-## Flags
+Collect diagnostics:
+
+```sh
+npx s20-wifi-pairing@latest diagnose
+```
+
+By default, `diagnose` writes:
+
+- `/tmp/s20-diag.txt`
+- `/tmp/s20-tcpdump.txt`
+
+It may prompt for `sudo` so it can clear stale ARP state and run `tcpdump`.
+
+## Pair Flags
 
 | Flag             | Env var            | Default         |
 | ---------------- | ------------------ | --------------- |
@@ -76,36 +82,47 @@ node scripts/s20-pairing.script.ts \
 | `--target-port`  | `S20_TARGET_PORT`  | `48899`         |
 | `--timeout-ms`   | —                  | `3000`          |
 
-Run `node scripts/s20-pairing.script.ts --help` for generated CLI help.
+## Diagnose Flags
+
+| Flag                 | Default                |
+| -------------------- | ---------------------- |
+| `--interface`        | `en0` on macOS         |
+| `--target-ip`        | `10.10.100.254`        |
+| `--gateway-ip`       | `10.10.100.1`          |
+| `--broadcast-ip`     | `10.10.100.255`        |
+| `--target-port`      | `48899`                |
+| `--probe-timeout-ms` | `3000`                 |
+| `--capture-seconds`  | `4`                    |
+| `--report-path`      | `/tmp/s20-diag.txt`    |
+| `--capture-path`     | `/tmp/s20-tcpdump.txt` |
 
 ## Troubleshooting
 
-- Make sure the plug LED is flashing blue before running the script.
-- Confirm your machine has a `10.10.100.x` address while connected to the
-  temporary plug network.
+- Make sure the plug LED is flashing blue before running `pair`.
+- Confirm your machine has a `10.10.100.x` address while connected to the temporary plug network.
 - Disable VPNs and other software that can hijack default routes.
-- If discovery works but unicast fails with `EHOSTUNREACH`, the script should
-  fall back to broadcast automatically.
+- If discovery works but unicast fails with `EHOSTUNREACH`, the CLI should fall back to broadcast automatically.
 - If pairing still fails, run:
 
 ```sh
-bash scripts/s20-diagnose.sh
+npx s20-wifi-pairing@latest diagnose
 ```
 
-That collects route state, ARP state, UDP probes, and a `tcpdump` capture to
-help debug what the host OS is doing on the AP network.
+That collects route state, interface state, UDP probes, and a `tcpdump` capture to help debug what the host OS is doing on the AP network.
 
 ## Development
 
 ```sh
 pnpm install
 pnpm lint
+pnpm test
 pnpm fix
 ```
 
 Useful commands:
 
 - `pnpm pair -- --ssid "MyWifi" --password "super-secret"` runs the pairing CLI.
-- `pnpm lint` runs cspell, eslint, knip, markdownlint, pnpm dedupe, prettier,
-  and TypeScript checks.
+- `pnpm diagnose` runs the diagnostics CLI.
+- `pnpm lint` runs cspell, eslint, knip, markdownlint, pnpm dedupe, prettier, and TypeScript checks.
+- `pnpm test` runs the hardware-free regression suite with built-in `node:test`.
 - `pnpm fix` applies the available autofixes.
