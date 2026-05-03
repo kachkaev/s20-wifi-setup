@@ -5,7 +5,11 @@ import {
   findLocalBindIpFromInterfaces,
   isIpv4OnSameNetwork,
 } from "../src/lib/network.ts";
-import { isDeviceReply, parseDiscoveryReply } from "../src/lib/s20.ts";
+import {
+  isDeviceReply,
+  isOkReply,
+  parseDiscoveryReply,
+} from "../src/lib/s20.ts";
 import { shouldUseBroadcastFallback } from "../src/lib/udp.ts";
 
 void test("parseDiscoveryReply parses a valid device response", () => {
@@ -27,6 +31,12 @@ void test("parseDiscoveryReply ignores non-device responses", () => {
 void test("isDeviceReply distinguishes device replies from self echo", () => {
   assert.equal(isDeviceReply("10.10.100.254,ACCF235676D6,HF-LPB100"), true);
   assert.equal(isDeviceReply("HF-A11ASSISTHREAD"), false);
+});
+
+void test("isOkReply accepts the plug acknowledgement line", () => {
+  assert.equal(isOkReply("+ok"), true);
+  assert.equal(isOkReply("+ok\r"), true);
+  assert.equal(isOkReply("OK"), false);
 });
 
 void test("isIpv4OnSameNetwork matches addresses inside the same subnet", () => {

@@ -6,6 +6,7 @@ export const defaultResponseTimeoutMs = 3000;
 export const defaultCapturePath = "/tmp/s20-tcpdump.txt";
 export const defaultReportPath = "/tmp/s20-diag.txt";
 export const discoveryMessage = "HF-A11ASSISTHREAD";
+const okReply = "+ok";
 
 type DiscoveryReply = {
   readonly ip: string;
@@ -28,6 +29,8 @@ export const buildDiscoveryFailedMessage = (
 
 export const isDeviceReply = (text: string) =>
   /^\d+\.\d+\.\d+\.\d+,[0-9a-f]+,/i.test(text);
+
+export const isOkReply = (text: string) => text.trim() === okReply;
 
 export const parseDiscoveryReply = (
   text: string,

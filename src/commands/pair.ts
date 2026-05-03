@@ -7,6 +7,8 @@ import {
   defaultBroadcastIp,
   defaultResponseTimeoutMs,
   defaultTargetPort,
+  discoveryMessage,
+  isOkReply,
   parseDiscoveryReply,
 } from "../lib/s20.ts";
 import {
@@ -25,8 +27,37 @@ type PairOptions = {
   readonly timeoutMs: number;
 };
 
+type ExpectedResponse = {
+  readonly description: string;
+  readonly matches: (text: string) => boolean;
+};
+
+type SendOptionsWithValidation = {
+  readonly expectResponse?: boolean;
+  readonly expectedResponse?: ExpectedResponse;
+};
+
 const formatUdpLine = (ip: string, port: number, text: string) =>
   `  <- ${ip}:${String(port)} ${text}`;
+
+const formatCommand = (message: string) =>
+  message.replace(/\r$/, String.raw`\r`);
+
+const buildPairFailedMessage = (
+  message: string,
+  expectedResponse: ExpectedResponse | undefined,
+  responses: ReadonlyArray<{ readonly text: string }>,
+) =>
+  [
+    `Pairing failed after sending ${formatCommand(message)}.`,
+    responses.length === 0
+      ? "No response received from the plug."
+      : `Received replies: ${responses.map((response) => JSON.stringify(response.text)).join(", ")}`,
+    expectedResponse
+      ? `Expected reply: ${expectedResponse.description}.`
+      : "Expected the plug to acknowledge the command.",
+    "Run `s20-wifi-setup diagnose` for a deeper report.",
+  ].join("\n");
 
 const retryTransient = <A, R>(
   effectFactory: () => Effect.Effect<A, Error, R>,
@@ -55,12 +86,12 @@ const discoverDevice = (
     yield* Console.log(
       `Discovering S20 via UDP broadcast to ${broadcastIp}:${String(targetPort)}...`,
     );
-    yield* Console.log("  -> HF-A11ASSISTHREAD (broadcast)");
+    yield* Console.log(`  -> ${discoveryMessage} (broadcast)`);
 
     const responses = yield* retryTransient(
       () =>
         sendUdpOnce({
-          message: "HF-A11ASSISTHREAD",
+          message: discoveryMessage,
           targetIp: broadcastIp,
           targetPort,
           localBindIp,
@@ -154,9 +185,15 @@ const runPair = (options: PairOptions) =>
           "Could not infer a local Wi-Fi IP from the S20 subnet, falling back to 0.0.0.0\n",
         );
 
-    const send = (message: string, expectResponse = true) =>
+    const sendWithValidation = (
+      message: string,
+      sendOptions: SendOptionsWithValidation = {},
+    ) =>
       Effect.gen(function* () {
-        yield* Console.log(`  -> ${message.replace(/\r$/, String.raw`\r`)}`);
+        const expectResponse = sendOptions.expectResponse ?? true;
+        const expectedResponse = sendOptions.expectedResponse;
+
+        yield* Console.log(`  -> ${formatCommand(message)}`);
 
         const responses = yield* sendUdpWithBroadcastFallback(
           {
@@ -172,16 +209,30 @@ const runPair = (options: PairOptions) =>
           options.broadcastIp,
         );
 
-        if (responses.length === 0 && expectResponse) {
-          yield* Console.log("  ⏱ timeout waiting for response");
-        }
-
         for (const response of responses) {
           yield* Console.log(
             formatUdpLine(response.ip, response.port, response.text),
           );
         }
+
+        if (
+          expectResponse &&
+          (responses.length === 0 ||
+            (expectedResponse !== undefined &&
+              !responses.some((response) =>
+                expectedResponse.matches(response.text),
+              )))
+        ) {
+          return yield* Effect.fail(
+            new Error(
+              buildPairFailedMessage(message, expectedResponse, responses),
+            ),
+          );
+        }
       });
+
+    const send = (message: string, expectResponse = true) =>
+      sendWithValidation(message, { expectResponse });
 
     yield* Console.log(
       `Pairing Wiwo S20 at ${targetIp}:${String(options.targetPort)}`,
@@ -189,7 +240,12 @@ const runPair = (options: PairOptions) =>
     yield* Console.log(`Target SSID: ${options.ssid}\n`);
 
     yield* Console.log("Step 1: handshake");
-    yield* send("HF-A11ASSISTHREAD");
+    yield* sendWithValidation(discoveryMessage, {
+      expectedResponse: {
+        description: "a device discovery reply",
+        matches: (text) => parseDiscoveryReply(text) !== undefined,
+      },
+    });
     yield* Effect.sleep("1 seconds");
 
     yield* Console.log("Step 2: confirm");
@@ -197,9 +253,24 @@ const runPair = (options: PairOptions) =>
     yield* Effect.sleep("1 seconds");
 
     yield* Console.log("Step 3: configure Wi-Fi");
-    yield* send(`AT+WSSSID=${options.ssid}\r`);
-    yield* send(`AT+WSKEY=WPA2PSK,AES,${password}\r`);
-    yield* send("AT+WMODE=STA\r");
+    yield* sendWithValidation(`AT+WSSSID=${options.ssid}\r`, {
+      expectedResponse: {
+        description: JSON.stringify("+ok"),
+        matches: isOkReply,
+      },
+    });
+    yield* sendWithValidation(`AT+WSKEY=WPA2PSK,AES,${password}\r`, {
+      expectedResponse: {
+        description: JSON.stringify("+ok"),
+        matches: isOkReply,
+      },
+    });
+    yield* sendWithValidation("AT+WMODE=STA\r", {
+      expectedResponse: {
+        description: JSON.stringify("+ok"),
+        matches: isOkReply,
+      },
+    });
 
     yield* Console.log("Step 4: reboot");
     yield* send("AT+Z\r", false);
