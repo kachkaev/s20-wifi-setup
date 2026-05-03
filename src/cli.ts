@@ -1,5 +1,5 @@
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
-import { Effect } from "effect";
+import { Console, Effect } from "effect";
 import { Command } from "effect/unstable/cli";
 
 import packageJson from "../package.json" with { type: "json" };
@@ -15,6 +15,15 @@ const cli = Command.make("s20-wifi-setup").pipe(
 
 const program = Command.run(cli, { version: packageJson.version }).pipe(
   Effect.provide(NodeServices.layer),
+  Effect.catch((error) =>
+    Console.error(error.message).pipe(
+      Effect.andThen(
+        Effect.sync(() => {
+          process.exitCode = 1;
+        }),
+      ),
+    ),
+  ),
 );
 
 NodeRuntime.runMain(program);

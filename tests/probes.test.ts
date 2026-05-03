@@ -110,3 +110,27 @@ void test("runUdpProbeSection probes the three targets sequentially with an inje
     "[global-broadcast] (no replies)",
   ]);
 });
+
+void test("runUdpProbeSection converts unexpected send causes into report lines", async () => {
+  const { reporter, lines } = createReporter();
+
+  await Effect.runPromise(
+    runUdpProbeSection(makeDiagnoseOptions(), reporter, (options) =>
+      options.targetIp === "255.255.255.255"
+        ? Effect.die(
+            Object.assign(
+              new Error("send EHOSTUNREACH 255.255.255.255:48899"),
+              {
+                code: "EHOSTUNREACH",
+              },
+            ),
+          )
+        : Effect.succeed([]),
+    ),
+  );
+
+  assert.match(
+    lines.at(-1) ?? "",
+    /\[global-broadcast\] send error: send EHOSTUNREACH 255\.255\.255\.255:48899/,
+  );
+});

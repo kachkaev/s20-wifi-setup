@@ -1,6 +1,6 @@
 import * as os from "node:os";
 
-import { Effect } from "effect";
+import { Cause, Effect, Exit } from "effect";
 
 import { findLocalBindIp } from "../network.ts";
 import { runCapturedCommand } from "../process.ts";
@@ -59,8 +59,8 @@ const probeUdp = (
     const localBindIp =
       findLocalBindIp(options.targetIp) ?? findLocalBindIp(options.broadcastIp);
 
-    try {
-      const responses = yield* sendUdp({
+    const result = yield* Effect.exit(
+      sendUdp({
         message: discoveryMessage,
         targetIp,
         targetPort: options.targetPort,
@@ -69,24 +69,28 @@ const probeUdp = (
         expectResponse: true,
         finishOnFirstReply: false,
         timeoutMs: options.probeTimeoutMs,
-      });
+      }),
+    );
 
-      return [
-        `[${label}] sent ${discoveryMessage} -> ${targetIp}:${String(options.targetPort)}`,
-        ...(responses.length === 0
-          ? [`[${label}] (no replies)`]
-          : responses.map(
-              (response) =>
-                `[${label}] reply from (${response.ip}, ${String(response.port)}): ${JSON.stringify(response.text)}`,
-            )),
-      ];
-    } catch (error) {
+    if (Exit.isFailure(result)) {
+      const error = Cause.squash(result.cause);
+
       return [
         `[${label}] send error: ${
           error instanceof Error ? error.message : String(error)
         }`,
       ];
     }
+
+    return [
+      `[${label}] sent ${discoveryMessage} -> ${targetIp}:${String(options.targetPort)}`,
+      ...(result.value.length === 0
+        ? [`[${label}] (no replies)`]
+        : result.value.map(
+            (response) =>
+              `[${label}] reply from (${response.ip}, ${String(response.port)}): ${JSON.stringify(response.text)}`,
+          )),
+    ];
   });
 
 export const runUdpProbeSection = (
