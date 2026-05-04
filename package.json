@@ -1,7 +1,7 @@
 {
   "name": "s20-wifi-setup",
   "version": "0.4.0",
-  "description": "Pair an Orvibo Wiwo S20 smart plug with a Wi-Fi network from the command line",
+  "description": "Connect legacy Orvibo Wiwo S20 smart plugs to Wi-Fi from the terminal",
   "keywords": [
     "orvibo",
     "wiwo",

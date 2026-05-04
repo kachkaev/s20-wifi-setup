@@ -1,73 +1,84 @@
 # s20-wifi-setup
 
-Pair an [Orvibo](https://www.orvibo.com/) Wiwo S20 smart plug with your Wi-Fi network from Terminal.
+Connect legacy Orvibo Wiwo S20 smart plugs to Wi-Fi from the terminal.
 
-The original Wiwo mobile app is gone, but old S20 plugs still work.
-This CLI recreates the pairing flow used by the app, so you can point the plug at your Wi-Fi network from a laptop.
+The original Wiwo app is no longer available, but older S20 plugs still work.
+This command-line tool recreates the pairing flow used by the app, so you can connect the plug to your Wi-Fi network from a laptop.
 
-If your plug looks like this, you're in the right place:
+If your plug looks like this, you're probably in the right place:
 
 <img src="docs/images/orvibo-wiwo-s20-light-blue.png" width="170" height="282" alt="Orvibo Wiwo S20 smart plug">
 
-## Safety
+> [!WARNING]
+> [Home Assistant's Orvibo integration page](https://www.home-assistant.io/integrations/orvibo/) warns about the European ORVIBO Wi-Fi SMART SOCKET S20 (`LGS-20`) and links to the [RAPEX recall entry](https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10002910).
+> That warning is about electrical safety, not software support.
+> Use this repo to pair hardware you already own.
+> It is not a recommendation to buy, keep using, or power up a recalled device without making your own safety assessment.
 
-[Home Assistant's Orvibo integration page](https://www.home-assistant.io/integrations/orvibo/) warns about the European ORVIBO Wi-Fi SMART SOCKET S20 (`LGS-20`) and links to the [RAPEX recall entry](https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10002910).
-The warning is about electrical safety, not software support.
-Treat this repo as a way to pair hardware you already own, not as a recommendation to buy or keep using a recalled device without making your own safety assessment.
+## What you will need
 
-## Before You Start
+- An Orvibo Wiwo S20 plug.
+- A Mac or Linux laptop with Wi-Fi and Terminal access.
+- [Node.js](https://nodejs.org/) 22 or newer installed.
+- The Wi-Fi name and password that the plug should use.
 
-- macOS and Linux are the supported platforms for this project.
-- `pair` may also work on Windows, but that path is experimental.
-- `diagnose` is for macOS and Linux only. On Windows, do not rely on it.
-- You need [Node.js](https://nodejs.org/) 22 or newer.
-- You need the Wi-Fi name and password that the plug should use.
-- The plug must be in pairing mode, with its LED flashing blue.
-- Your laptop must be connected to the plug's temporary Wi-Fi network, usually `WiWo-S20`.
-- VPNs should be turned off while pairing.
+> [!NOTE]
+> Windows may also work, but this tool was tested on macOS and Linux.
 
-You do not need to clone this repo.
-You do not need to know TypeScript, JavaScript, or `pnpm`.
-The `npx` command below comes with Node.js.
-It downloads the tool [from npm](https://www.npmjs.com/package/s20-wifi-setup) and runs it.
+If `node --version` or `npm --version` fails, install Node.js first and then come back here.
 
-If `node --version` or `npx --version` fails, install Node.js first and then come back here.
-
-## Quick Start
-
-Run this in Terminal and replace the Wi-Fi details with your own:
+Install the tool while your laptop is still connected to the internet:
 
 ```sh
-npx s20-wifi-setup@latest pair \
-  --ssid "MyWifi" \
-  --password "super-secret"
+npm install --global s20-wifi-setup
 ```
 
-If `npx` asks whether it should download the package, answer `y`.
+This avoids relying on the npm registry after you switch to the plug's temporary Wi-Fi network.
+You do not need to clone this repo or know JavaScript.
 
-On Windows, `pair` may still work, but it is not part of the main support matrix.
-If it fails there, retry from macOS or Linux before digging any deeper.
+## Pair the plug
 
-The CLI will then:
+1.  While your laptop is still connected to the internet, make sure the pairing tool is ready:
 
-1.  discover the plug on the temporary `WiWo-S20` network,
-1.  send your Wi-Fi name and password to the plug,
-1.  reboot the plug so it leaves AP mode and joins your normal network.
+    ```sh
+    s20-wifi-setup --help
+    ```
 
-When the command ends with:
+    You should see the help output.
 
-```text
-Done. The S20 should now reboot and join the SSID.
-```
+1.  Plug the S20 into a power socket.
 
-wait a few seconds for the plug to reconnect.
-Your laptop may lose connectivity at that point because it is still joined to the plug's temporary Wi-Fi network, so reconnect it to your usual Wi-Fi if needed.
+1.  Put the plug into pairing mode by pressing and holding the button on it.
+    The LED should start flashing blue.
 
-## If Pairing Fails
+1.  On your laptop, turn off any VPN or network-routing tools until the plug is paired.
+
+1.  Connect your laptop to the plug's temporary Wi-Fi network, usually `WiWo-S20`.
+
+1.  Run the pairing command and replace the Wi-Fi details with your own:
+
+    ```sh
+    s20-wifi-setup pair --ssid "MyWifi" --password "super-secret"
+    ```
+
+    > [!TIP]
+    > The command above includes your Wi-Fi password, so it may end up in your shell history.
+    > In Bash, adding a leading space can keep it out of history if `HISTCONTROL` is set to `ignorespace` or `ignoreboth`.
+
+1.  Wait for the command to finish with:
+
+    ```text
+    Done. The S20 should now reboot and join the SSID.
+    ```
+
+1.  Wait a few seconds for the plug to reconnect to your normal Wi-Fi.
+1.  Reconnect your laptop to your usual Wi-Fi network if needed.
+
+## If pairing fails
 
 Start with these checks:
 
-- Make sure the LED is still flashing blue.
+- Make sure the LED is still quickly flashing blue.
 - Confirm that your laptop got a `10.10.100.x` address while joined to `WiWo-S20`.
 - Turn off VPNs or route-altering network tools.
 - If the plug uses a non-default IP, try `--target-ip`.
@@ -75,7 +86,7 @@ Start with these checks:
 Example:
 
 ```sh
-npx s20-wifi-setup@latest pair \
+s20-wifi-setup pair \
   --ssid "MyWifi" \
   --password "super-secret" \
   --target-ip 10.10.100.254
@@ -84,7 +95,7 @@ npx s20-wifi-setup@latest pair \
 If that still does not work and you are on macOS or Linux, collect a diagnostic report:
 
 ```sh
-npx s20-wifi-setup@latest diagnose
+s20-wifi-setup diagnose
 ```
 
 Do not use `diagnose` as your next step on Windows.
@@ -92,7 +103,7 @@ Do not use `diagnose` as your next step on Windows.
 `diagnose` prints a full report to stdout.
 It may prompt for `sudo` so it can clear stale ARP state and run `tcpdump`.
 
-## What The Tool Actually Does
+## What the tool actually does
 
 The S20 exposes a temporary Wi-Fi network while in pairing mode.
 Once your laptop is connected to that network, this tool talks to the plug over UDP and reproduces the same AP-mode commands used by the original app.
@@ -103,22 +114,22 @@ When that happens, the CLI retries via subnet broadcast automatically.
 On Windows, pairing may still work because the actual pairing flow is just UDP over the plug's temporary network.
 The unsupported part is diagnostics, not the core pairing protocol.
 
-## Command Reference
+## Command reference
 
 Show built-in help:
 
 ```sh
-npx s20-wifi-setup@latest --help
+s20-wifi-setup --help
 ```
 
 Use environment variables instead of command-line flags:
 
 ```sh
 WIFI_SSID="MyWifi" WIFI_PASSWORD="super-secret" \
-  npx s20-wifi-setup@latest pair
+  s20-wifi-setup pair
 ```
 
-### `pair` Flags
+### `pair` flags
 
 `pair` is supported on macOS and Linux.
 It may also work on Windows, but that path is experimental.
@@ -132,7 +143,7 @@ It may also work on Windows, but that path is experimental.
 | `--target-port`  | `S20_TARGET_PORT`  | `48899`         |
 | `--timeout-ms`   | —                  | `3000`          |
 
-### `diagnose` Flags
+### `diagnose` flags
 
 `diagnose` is intended for macOS and Linux only.
 On Windows, it shows a warning and only produces a best-effort report.

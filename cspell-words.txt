@@ -11,8 +11,11 @@ esbuild
 getairportnetwork
 getifaddr
 HomeAssistant
+HISTCONTROL
 ifconfig
 ifscope
+ignoreboth
+ignorespace
 IPs
 kachkaev
 Kachkaev

@@ -9,7 +9,7 @@ export type CapturedCommandResult = {
   readonly stderr: string;
   readonly combined: string;
   readonly exitCode: number;
-  readonly signal: NodeJS.Signals | null;
+  readonly signal: NodeJS.Signals | undefined;
 };
 
 type RunningCommandCapture = {
@@ -87,7 +87,7 @@ export const runCapturedCommand = (
         stderr,
         combined,
         exitCode: Number(exitCode),
-        signal: null,
+        signal: undefined,
       } satisfies CapturedCommandResult;
     }),
   ).pipe(Effect.mapError(toError), Effect.provide(NodeServices.layer));
@@ -181,7 +181,7 @@ export const startCapturedCommand = (
             stderr,
             combined,
             exitCode: Number(exitCode),
-            signal: null,
+            signal: undefined,
           } satisfies CapturedCommandResult;
         }).pipe(
           Effect.ensuring(Scope.close(scope, Exit.void)),

@@ -55,7 +55,7 @@ function makeCapturedCommandResult(stdout: string): CapturedCommandResult {
     stderr: "",
     combined: stdout,
     exitCode: 0,
-    signal: noSignal,
+    signal: noSignal ?? undefined,
   };
 }
 
