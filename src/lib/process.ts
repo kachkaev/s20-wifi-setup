@@ -1,6 +1,6 @@
-import { spawn } from "node:child_process";
-
-import { Effect } from "effect";
+import { NodeServices } from "@effect/platform-node";
+import { Effect, Exit, Fiber, Scope, Stream } from "effect";
+import { ChildProcess } from "effect/unstable/process";
 
 export type CapturedCommandResult = {
   readonly command: string;
@@ -16,32 +16,45 @@ type RunningCommandCapture = {
   readonly stop: () => Effect.Effect<CapturedCommandResult, Error>;
 };
 
-const chunksToString = (chunks: readonly Buffer[]) =>
-  Buffer.concat(chunks).toString("utf8");
+const captureStream = <E, R>(stream: Stream.Stream<Uint8Array, E, R>) =>
+  stream.pipe(
+    Stream.decodeText(),
+    Stream.runFold(
+      () => "",
+      (output, chunk) => output + chunk,
+    ),
+  );
 
-export const commandExists = (command: string) =>
-  Effect.promise<boolean>(
-    () =>
-      new Promise((resolve) => {
-        const lookup =
-          process.platform === "win32"
-            ? spawn("where", [command], { stdio: "ignore" })
-            : spawn(
-                "/bin/sh",
-                ["-lc", `command -v ${command} >/dev/null 2>&1`],
-                {
-                  stdio: "ignore",
-                },
-              );
+const toError = (error: unknown) =>
+  error instanceof Error ? error : new Error(String(error));
 
-        lookup.on("error", () => {
-          resolve(false);
-        });
+export const commandExists = (command: string): Effect.Effect<boolean> =>
+  Effect.scoped(
+    Effect.gen(function* () {
+      const handle = yield* (
+        process.platform === "win32"
+          ? ChildProcess.make("where", [command], {
+              stdin: "ignore",
+              stdout: "ignore",
+              stderr: "ignore",
+            })
+          : ChildProcess.make(
+              "/bin/sh",
+              ["-lc", `command -v ${command} >/dev/null 2>&1`],
+              {
+                stdin: "ignore",
+                stdout: "ignore",
+                stderr: "ignore",
+              },
+            )
+      ).asEffect();
 
-        lookup.on("close", (code) => {
-          resolve(code === 0);
-        });
-      }),
+      const exitCode = yield* handle.exitCode;
+      return exitCode === 0;
+    }),
+  ).pipe(
+    Effect.catch(() => Effect.succeed(false)),
+    Effect.provide(NodeServices.layer),
   );
 
 export const runCapturedCommand = (
@@ -50,65 +63,50 @@ export const runCapturedCommand = (
   options?: {
     readonly stdin?: "ignore" | "inherit";
   },
-) =>
-  Effect.promise<CapturedCommandResult>(
-    () =>
-      new Promise((resolve, reject) => {
-        const child = spawn(command, [...args], {
-          stdio: [options?.stdin ?? "ignore", "pipe", "pipe"],
-        });
-        const stdoutChunks: Buffer[] = [];
-        const stderrChunks: Buffer[] = [];
+): Effect.Effect<CapturedCommandResult, Error> =>
+  Effect.scoped(
+    Effect.gen(function* () {
+      const handle = yield* ChildProcess.make(command, [...args], {
+        stdin: options?.stdin ?? "ignore",
+      }).asEffect();
 
-        child.on("error", (error) => {
-          reject(error);
-        });
+      const { stdout, stderr, combined, exitCode } = yield* Effect.all(
+        {
+          stdout: captureStream(handle.stdout),
+          stderr: captureStream(handle.stderr),
+          combined: captureStream(handle.all),
+          exitCode: handle.exitCode,
+        },
+        { concurrency: "unbounded" },
+      );
 
-        child.stdout.on("data", (chunk: Buffer) => {
-          stdoutChunks.push(chunk);
-        });
-
-        child.stderr.on("data", (chunk: Buffer) => {
-          stderrChunks.push(chunk);
-        });
-
-        child.on("close", (exitCode, signal) => {
-          const stdout = chunksToString(stdoutChunks);
-          const stderr = chunksToString(stderrChunks);
-
-          resolve({
-            command,
-            args,
-            stdout,
-            stderr,
-            combined: `${stdout}${stderr}`,
-            exitCode: exitCode ?? 1,
-            signal,
-          });
-        });
-      }),
-  );
+      return {
+        command,
+        args,
+        stdout,
+        stderr,
+        combined,
+        exitCode: Number(exitCode),
+        signal: null,
+      } satisfies CapturedCommandResult;
+    }),
+  ).pipe(Effect.mapError(toError), Effect.provide(NodeServices.layer));
 
 export const runInteractiveCommand = (
   command: string,
   args: readonly string[],
-) =>
-  Effect.promise<number>(
-    () =>
-      new Promise((resolve, reject) => {
-        const child = spawn(command, [...args], {
-          stdio: "inherit",
-        });
+): Effect.Effect<number, Error> =>
+  Effect.scoped(
+    Effect.gen(function* () {
+      const handle = yield* ChildProcess.make(command, [...args], {
+        stdin: "inherit",
+        stdout: "inherit",
+        stderr: "inherit",
+      }).asEffect();
 
-        child.on("error", (error) => {
-          reject(error);
-        });
-
-        child.on("close", (exitCode) => {
-          resolve(exitCode ?? 1);
-        });
-      }),
-  );
+      return Number(yield* handle.exitCode);
+    }),
+  ).pipe(Effect.mapError(toError), Effect.provide(NodeServices.layer));
 
 export const startCapturedCommand = (
   command: string,
@@ -117,69 +115,77 @@ export const startCapturedCommand = (
     readonly stdin?: "ignore" | "inherit";
     readonly timeoutMs?: number;
   },
-) =>
-  Effect.promise<RunningCommandCapture>(
-    () =>
-      new Promise((resolve, reject) => {
-        const child = spawn(command, [...args], {
-          stdio: [options?.stdin ?? "ignore", "pipe", "pipe"],
-        });
-        const stdoutChunks: Buffer[] = [];
-        const stderrChunks: Buffer[] = [];
-        let finished = false;
-        let timeout: NodeJS.Timeout | undefined;
+): Effect.Effect<RunningCommandCapture, Error> =>
+  Effect.gen(function* () {
+    const scope = yield* Scope.make();
+    const handle = yield* Effect.provideService(
+      ChildProcess.make(command, [...args], {
+        stdin: options?.stdin ?? "ignore",
+      }).asEffect(),
+      Scope.Scope,
+      scope,
+    ).pipe(Effect.mapError(toError));
 
-        const completion = new Promise<CapturedCommandResult>(
-          (resolveCompletion) => {
-            child.stdout.on("data", (chunk: Buffer) => {
-              stdoutChunks.push(chunk);
-            });
+    const stdoutFiber = yield* Effect.forkIn(
+      captureStream(handle.stdout),
+      scope,
+    );
+    const stderrFiber = yield* Effect.forkIn(
+      captureStream(handle.stderr),
+      scope,
+    );
+    const combinedFiber = yield* Effect.forkIn(
+      captureStream(handle.all),
+      scope,
+    );
+    const exitCodeFiber = yield* Effect.forkIn(handle.exitCode, scope);
 
-            child.stderr.on("data", (chunk: Buffer) => {
-              stderrChunks.push(chunk);
-            });
+    if (options?.timeoutMs) {
+      yield* Effect.forkIn(
+        Effect.sleep(options.timeoutMs).pipe(
+          Effect.andThen(handle.kill({ killSignal: "SIGTERM" })),
+          Effect.catch(() => Effect.void),
+        ),
+        scope,
+      );
+    }
 
-            child.on("close", (exitCode, signal) => {
-              if (timeout) {
-                clearTimeout(timeout);
-              }
+    let finished = false;
 
-              const stdout = chunksToString(stdoutChunks);
-              const stderr = chunksToString(stderrChunks);
+    return {
+      stop: () =>
+        Effect.gen(function* () {
+          if (!finished) {
+            finished = true;
+            yield* handle
+              .kill({ killSignal: "SIGTERM" })
+              .pipe(Effect.catch(() => Effect.void));
+          }
 
-              resolveCompletion({
-                command,
-                args,
-                stdout,
-                stderr,
-                combined: `${stdout}${stderr}`,
-                exitCode: exitCode ?? 1,
-                signal,
-              });
-            });
-          },
-        );
+          const { stdout, stderr, combined, exitCode } = yield* Effect.all(
+            {
+              stdout: Fiber.join(stdoutFiber),
+              stderr: Fiber.join(stderrFiber),
+              combined: Fiber.join(combinedFiber),
+              exitCode: Fiber.join(exitCodeFiber),
+            },
+            { concurrency: "unbounded" },
+          );
 
-        child.on("error", (error) => {
-          reject(error);
-        });
+          yield* Scope.close(scope, Exit.void);
 
-        if (options?.timeoutMs) {
-          timeout = setTimeout(() => {
-            child.kill("SIGTERM");
-          }, options.timeoutMs);
-        }
-
-        resolve({
-          stop: () =>
-            Effect.promise(async () => {
-              if (!finished && !child.killed) {
-                finished = true;
-                child.kill("SIGTERM");
-              }
-
-              return completion;
-            }),
-        });
-      }),
-  );
+          return {
+            command,
+            args,
+            stdout,
+            stderr,
+            combined,
+            exitCode: Number(exitCode),
+            signal: null,
+          } satisfies CapturedCommandResult;
+        }).pipe(
+          Effect.ensuring(Scope.close(scope, Exit.void)),
+          Effect.mapError(toError),
+        ),
+    } satisfies RunningCommandCapture;
+  }).pipe(Effect.provide(NodeServices.layer));
