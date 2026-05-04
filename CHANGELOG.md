@@ -1,5 +1,14 @@
 # s20-wifi-setup
 
+## 0.5.0
+
+### Minor Changes
+
+- Refine the CLI, package, and README one-liner to make it clearer that the
+  tool connects legacy Orvibo Wiwo S20 smart plugs to Wi-Fi from the terminal.
+- Refactor command execution helpers to use Effect child processes internally
+  while keeping the diagnostics and probe coverage passing.
+
 ## 0.4.0
 
 ### Minor Changes
