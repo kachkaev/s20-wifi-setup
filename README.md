@@ -1,44 +1,61 @@
 # s20-wifi-setup
 
-Connect legacy Orvibo Wiwo S20 smart plugs to Wi-Fi from the terminal.
+_Connect legacy [Orvibo](https://www.orvibo.com) WiWo S20 smart plugs to Wi-Fi from the terminal_
 
-The original Wiwo app is no longer available, but older S20 plugs still work.
-This command-line tool recreates the pairing flow used by the app, so you can connect the plug to your Wi-Fi network from a laptop.
+[![npm version](https://img.shields.io/npm/v/s20-wifi-setup?logo=npm&color=3c7ef6&labelColor=333)](https://www.npmjs.com/package/s20-wifi-setup)
+[![npm downloads](https://img.shields.io/npm/dt/s20-wifi-setup?logo=npm&color=3c7ef6&labelColor=333)](https://www.npmjs.com/package/s20-wifi-setup)
+[![CI](https://img.shields.io/github/actions/workflow/status/kachkaev/s20-wifi-setup/ci.yaml?branch=main&label=CI&logo=github&color=3c7ef6&labelColor=333)](https://github.com/kachkaev/s20-wifi-setup/actions/workflows/ci.yaml)
+[![License](https://img.shields.io/badge/license-BSD--3--Clause-3c7ef6?labelColor=333)](LICENSE.md)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-friendly-3c7ef6?logo=homeassistant&logoColor=white&labelColor=333)](https://www.home-assistant.io/integrations/orvibo)
 
-If your plug looks like this, you're probably in the right place:
+The original WiWo app is no longer available, but the plugs still work.
+This command-line tool recreates the pairing flow used by the app, so you can connect the plug to your Wi-Fi network from a computer.
 
-<img src="docs/images/orvibo-wiwo-s20-light-blue.png" width="170" height="282" alt="Orvibo Wiwo S20 smart plug">
+If your plug looks like this, you're probably in the right place!
 
-> [!WARNING]
-> [Home Assistant's Orvibo integration page](https://www.home-assistant.io/integrations/orvibo/) warns about the European ORVIBO Wi-Fi SMART SOCKET S20 (`LGS-20`) and links to the [RAPEX recall entry](https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10002910).
+<img src="docs/images/orvibo-wiwo-s20-light-blue.png" width="170" height="282" alt="Orvibo WiWo S20 smart plug">
+
+> ⚠️ **Warning**  
+> [Home Assistant's Orvibo integration page](https://www.home-assistant.io/integrations/orvibo) warns about the European ORVIBO Wi-Fi SMART SOCKET S20 (`LGS-20`) and links to the [RAPEX recall entry](https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10002910).
 > That warning is about electrical safety, not software support.
 > Use this repo to pair hardware you already own.
 > It is not a recommendation to buy, keep using, or power up a recalled device without making your own safety assessment.
 
 ## What you will need
 
-- An Orvibo Wiwo S20 plug.
-- A Mac or Linux laptop with Wi-Fi and Terminal access.
-- [Node.js](https://nodejs.org/) 22 or newer installed.
-- The Wi-Fi name and password that the plug should use.
+- An Orvibo WiWo S20 plug
+- A Mac or Linux computer with Wi-Fi and Terminal access  
+  _Windows may also work, but the tool was not tested there_
+- [Node.js](https://nodejs.org) 22 or newer installed
+- The Wi-Fi name and password that the plug should use
 
-> [!NOTE]
-> Windows may also work, but this tool was tested on macOS and Linux.
-
-If `node --version` or `npm --version` fails, install Node.js first and then come back here.
-
-Install the tool while your laptop is still connected to the internet:
-
-```sh
-npm install --global s20-wifi-setup
-```
-
-This avoids relying on the npm registry after you switch to the plug's temporary Wi-Fi network.
 You do not need to clone this repo or know JavaScript.
+If `node --version` or `npm --version` fail, install Node.js first and then come back here.
 
-## Pair the plug
+## Step-by-step pairing instructions
 
-1.  While your laptop is still connected to the internet, make sure the pairing tool is ready:
+1.  Install the tool while your computer is still connected to the internet:
+
+    ```sh
+    npm install --global s20-wifi-setup
+    ```
+
+    Using `npx` here will usually fail.
+    Running `npx s20-wifi-setup` still checks the npm registry, which is unavailable once you switch to the plug's temporary Wi-Fi network.
+
+    > 💡 **Tip**  
+    > If a global install is inconvenient, you can install the tool into a throwaway local project instead:
+    >
+    > ```sh
+    > cd /path/to/some/empty/directory
+    > npm init --yes
+    > npm install --save-dev s20-wifi-setup
+    > ```
+    >
+    > If you install the tool locally, run `npm exec s20-wifi-setup -- [args]` from that directory instead of `s20-wifi-setup [args]`.
+    > The rest of this README assumes a global install.
+
+1.  While your computer is still connected to the internet, make sure the pairing tool starts correctly:
 
     ```sh
     s20-wifi-setup --help
@@ -50,10 +67,11 @@ You do not need to clone this repo or know JavaScript.
 
 1.  Put the plug into pairing mode by pressing and holding the button on it.
     The LED should start flashing blue.
+    If it flashes red instead, press and hold the button again.
 
-1.  On your laptop, turn off any VPN or network-routing tools until the plug is paired.
+1.  On your computer, turn off any VPNs or other tools that change network routing until the plug is paired.
 
-1.  Connect your laptop to the plug's temporary Wi-Fi network, usually `WiWo-S20`.
+1.  Connect your computer to the plug's temporary Wi-Fi network, usually `WiWo-S20`.
 
 1.  Run the pairing command and replace the Wi-Fi details with your own:
 
@@ -61,26 +79,42 @@ You do not need to clone this repo or know JavaScript.
     s20-wifi-setup pair --ssid "MyWifi" --password "super-secret"
     ```
 
-    > [!TIP]
+    > 💡 **Tip**  
     > The command above includes your Wi-Fi password, so it may end up in your shell history.
     > In Bash, adding a leading space can keep it out of history if `HISTCONTROL` is set to `ignorespace` or `ignoreboth`.
 
-1.  Wait for the command to finish with:
+1.  Wait for the command to finish.
+    You should see:
 
     ```text
-    Done. The S20 should now reboot and join the SSID.
+    Done. The S20 should now reboot and join your Wi-Fi.
     ```
 
-1.  Wait a few seconds for the plug to reconnect to your normal Wi-Fi.
-1.  Reconnect your laptop to your usual Wi-Fi network if needed.
+1.  Wait a few seconds for the plug to reconnect to your usual Wi-Fi.
+
+1.  Reconnect your computer to your usual Wi-Fi network if needed.
+
+1.  Enjoy your smart plug!
+
+    🎉 🎉 🎉  
+    🎉 🔌 🎉  
+    🎉 🎉 🎉
+
+    Consider integrating it with [Home Assistant](https://www.home-assistant.io/integrations/orvibo) or your preferred home automation system.
+
+1.  Uninstall the tool if you no longer need it:
+
+    ```sh
+    npm uninstall --global s20-wifi-setup
+    ```
 
 ## If pairing fails
 
 Start with these checks:
 
 - Make sure the LED is still quickly flashing blue.
-- Confirm that your laptop got a `10.10.100.x` address while joined to `WiWo-S20`.
-- Turn off VPNs or route-altering network tools.
+- Confirm that your computer got a `10.10.100.x` address while joined to `WiWo-S20`.
+- Turn off VPNs or other tools that change network routing.
 - If the plug uses a non-default IP, try `--target-ip`.
 
 Example:
@@ -98,15 +132,19 @@ If that still does not work and you are on macOS or Linux, collect a diagnostic 
 s20-wifi-setup diagnose
 ```
 
-Do not use `diagnose` as your next step on Windows.
+Do not rely on `diagnose` as your next step on Windows.
+The most useful diagnostics currently require macOS or Linux.
 
-`diagnose` prints a full report to stdout.
+The `diagnose` command prints a full report to stdout.
 It may prompt for `sudo` so it can clear stale ARP state and run `tcpdump`.
+
+You can create an issue describing the details, but please be mindful about sharing private information such as MAC addresses or Wi-Fi names.
+If you want a quicker first pass, paste the report into an LLM alongside a link to this repo instead of opening an issue right away.
 
 ## What the tool actually does
 
 The S20 exposes a temporary Wi-Fi network while in pairing mode.
-Once your laptop is connected to that network, this tool talks to the plug over UDP and reproduces the same AP-mode commands used by the original app.
+Once your computer is connected to that network, this tool talks to the plug over UDP and reproduces the same AP-mode commands used by the original WiWo app.
 
 It also handles a macOS-specific failure mode where discovery works, but direct sends to `10.10.100.254` fail with `EHOSTUNREACH`.
 When that happens, the CLI retries via subnet broadcast automatically.
@@ -160,7 +198,7 @@ On Windows, it shows a warning and only produces a best-effort report.
 
 ## Development
 
-This section is for working on the CLI itself.
+This section is for contributing to the tool itself.
 If you only want to pair a plug, you can ignore it.
 
 Install dependencies:
@@ -181,9 +219,9 @@ Useful commands:
 - `pnpm build` builds the bundled `dist/cli.js` artifact used for npm publishing.
 - `node src/cli.ts pair --ssid "MyWifi" --password "super-secret"` runs the pairing flow locally.
 - `node src/cli.ts diagnose` runs the diagnostics flow locally.
-- `pnpm lint` runs cspell, eslint, knip, markdownlint, pnpm dedupe, prettier, and TypeScript checks.
-- `pnpm test` runs the hardware-free regression suite with built-in `node:test`.
+- `pnpm lint` runs linters (cspell, eslint, knip, markdownlint, pnpm dedupe, prettier, and TypeScript).
 - `pnpm fix` applies the available autofixes.
+- `pnpm test` runs the hardware-free unit tests.
 
 ## Acknowledgements
 

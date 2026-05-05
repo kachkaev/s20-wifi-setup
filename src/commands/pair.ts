@@ -8,6 +8,8 @@ import {
   defaultResponseTimeoutMs,
   defaultTargetPort,
   discoveryMessage,
+  type DiscoveryReply,
+  formatMacAddress,
   isOkReply,
   parseDiscoveryReply,
 } from "../lib/s20.ts";
@@ -128,11 +130,12 @@ const discoverDevice = (
       );
     }
 
-    yield* Console.log(
-      `Found S20: ip=${firstReply.ip} mac=${firstReply.mac} module=${firstReply.module}\n`,
-    );
+    yield* Console.log("Found S20:");
+    yield* Console.log(`  IP: ${firstReply.ip}`);
+    yield* Console.log(`  MAC: ${formatMacAddress(firstReply.mac)}`);
+    yield* Console.log(`  Module: ${firstReply.module}\n`);
 
-    return firstReply.ip;
+    return firstReply;
   });
 
 type SendUdpEffect = (
@@ -197,14 +200,19 @@ const runPair = (options: PairOptions) =>
     const password = Redacted.value(options.password);
     const broadcastBindIp = findLocalBindIp(options.broadcastIp);
 
-    const targetIp =
-      options.targetIp ??
-      (yield* discoverDevice(
+    let discoveredDevice: DiscoveryReply | undefined;
+    let targetIp = options.targetIp;
+
+    if (!targetIp) {
+      discoveredDevice = yield* discoverDevice(
         options.broadcastIp,
         options.targetPort,
         options.timeoutMs,
         broadcastBindIp,
-      ));
+      );
+      targetIp = discoveredDevice.ip;
+    }
+
     const localBindIp = findLocalBindIp(targetIp) ?? broadcastBindIp;
 
     if (options.targetIp) {
@@ -265,7 +273,7 @@ const runPair = (options: PairOptions) =>
     yield* Console.log(
       `Pairing Wiwo S20 at ${targetIp}:${String(options.targetPort)}`,
     );
-    yield* Console.log(`Target SSID: ${options.ssid}\n`);
+    yield* Console.log(`Target Wi-Fi: ${options.ssid}\n`);
 
     yield* Console.log("Step 1: handshake");
     yield* sendWithValidation(discoveryMessage, {
@@ -303,7 +311,15 @@ const runPair = (options: PairOptions) =>
     yield* Console.log("Step 4: reboot");
     yield* send("AT+Z\r", false);
 
-    yield* Console.log("\nDone. The S20 should now reboot and join the SSID.");
+    yield* Console.log(
+      "\nDone. The S20 should now reboot and join your Wi-Fi.",
+    );
+
+    if (discoveredDevice) {
+      yield* Console.log(
+        `Plug MAC address: ${formatMacAddress(discoveredDevice.mac)}`,
+      );
+    }
   });
 
 export const pairCommand = Command.make("pair", {

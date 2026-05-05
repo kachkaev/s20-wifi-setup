@@ -6,6 +6,7 @@ import {
   isIpv4OnSameNetwork,
 } from "../src/lib/network.ts";
 import {
+  formatMacAddress,
   isDeviceReply,
   isOkReply,
   parseDiscoveryReply,
@@ -26,6 +27,14 @@ void test("parseDiscoveryReply parses a valid device response", () => {
 void test("parseDiscoveryReply ignores non-device responses", () => {
   assert.equal(parseDiscoveryReply("HF-A11ASSISTHREAD"), undefined);
   assert.equal(parseDiscoveryReply("10.10.100.254"), undefined);
+});
+
+void test("formatMacAddress inserts separators for raw discovery replies", () => {
+  assert.equal(formatMacAddress("ACCF235676D6"), "AC:CF:23:56:76:D6");
+});
+
+void test("formatMacAddress preserves already formatted addresses", () => {
+  assert.equal(formatMacAddress("00:11:22:33:44:55"), "00:11:22:33:44:55");
 });
 
 void test("isDeviceReply distinguishes device replies from self echo", () => {

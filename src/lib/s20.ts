@@ -6,7 +6,7 @@ export const defaultResponseTimeoutMs = 3000;
 export const discoveryMessage = "HF-A11ASSISTHREAD";
 const okReply = "+ok";
 
-type DiscoveryReply = {
+export type DiscoveryReply = {
   readonly ip: string;
   readonly mac: string;
   readonly module: string;
@@ -29,6 +29,16 @@ export const isDeviceReply = (text: string) =>
   /^\d+\.\d+\.\d+\.\d+,[0-9a-f]+,/i.test(text);
 
 export const isOkReply = (text: string) => text.trim() === okReply;
+
+export const formatMacAddress = (mac: string) => {
+  const normalized = mac.replaceAll(/[^0-9a-f]/gi, "").toUpperCase();
+
+  if (normalized.length !== 12) {
+    return mac.toUpperCase();
+  }
+
+  return normalized.match(/.{2}/g)?.join(":") ?? mac.toUpperCase();
+};
 
 export const parseDiscoveryReply = (
   text: string,
