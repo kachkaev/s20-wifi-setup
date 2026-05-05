@@ -225,5 +225,5 @@ Useful commands:
 
 ## Acknowledgements
 
-This project was inspired by [darrensteele/s20](https://github.com/darrensteele/s20), a Python tool for pairing Orvibo S20 plugs.
+This project was inspired by [darrensteele/s20](https://github.com/darrensteele/s20), a Python tool for pairing Orvibo S20 sockets.
 That project helped confirm the basic UDP pairing flow, even though it did not work on my setup without further changes.
