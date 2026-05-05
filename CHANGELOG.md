@@ -1,5 +1,12 @@
 # s20-wifi-setup
 
+## 1.0.2
+
+### Patch Changes
+
+- Align the acknowledgements wording with the rest of the docs by referring
+  to the Orvibo S20 as a socket there too.
+
 ## 1.0.1
 
 ### Patch Changes
