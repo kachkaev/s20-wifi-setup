@@ -1,6 +1,6 @@
 {
   "name": "s20-wifi-setup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Connect legacy Orvibo Wiwo S20 smart sockets to Wi-Fi from the terminal",
   "keywords": [
     "orvibo",

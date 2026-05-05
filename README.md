@@ -10,7 +10,6 @@ _Connect legacy [Orvibo](https://www.orvibo.com) WiWo S20 smart sockets to Wi-Fi
 
 The original WiWo app is no longer available, but the sockets still work.
 This command-line tool recreates the pairing flow used by the app, so you can connect the socket to your Wi-Fi network from a computer.
-If you searched for an Orvibo S20 smart plug, this repo covers the same device.
 
 If your socket looks like this, you're probably in the right place!
 

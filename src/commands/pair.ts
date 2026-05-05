@@ -54,11 +54,13 @@ export const buildPairFailedMessage = (
   [
     `Pairing failed after sending ${formatCommand(message)}.`,
     responses.length === 0
-      ? "No response received from the plug."
-      : `Received replies: ${responses.map((response) => JSON.stringify(response.text)).join(", ")}`,
+      ? "No response received from the socket."
+      : `Received replies: ${responses
+          .map((response) => JSON.stringify(response.text))
+          .join(", ")}`,
     expectedResponse
       ? `Expected reply: ${expectedResponse.description}.`
-      : "Expected the plug to acknowledge the command.",
+      : "Expected the socket to acknowledge the command.",
     "Run `s20-wifi-setup diagnose` for a deeper report.",
   ].join("\n");
 
@@ -317,14 +319,14 @@ const runPair = (options: PairOptions) =>
 
     if (discoveredDevice) {
       yield* Console.log(
-        `Plug MAC address: ${formatMacAddress(discoveredDevice.mac)}`,
+        `S20 MAC address: ${formatMacAddress(discoveredDevice.mac)}`,
       );
     }
   });
 
 export const pairCommand = Command.make("pair", {
   ssid: Flag.string("ssid").pipe(
-    Flag.withDescription("Name of the Wi-Fi network the plug should join"),
+    Flag.withDescription("Name of the Wi-Fi network the socket should join"),
     Flag.withFallbackConfig(Config.string("WIFI_SSID")),
   ),
   password: Flag.redacted("password").pipe(
@@ -333,18 +335,20 @@ export const pairCommand = Command.make("pair", {
   ),
   targetIp: Flag.optional(
     Flag.string("target-ip").pipe(
-      Flag.withDescription("Skip discovery and talk to this plug IP directly"),
+      Flag.withDescription(
+        "Skip discovery and talk to this socket IP directly",
+      ),
       Flag.withFallbackConfig(Config.string("S20_TARGET_IP")),
     ),
   ),
   broadcastIp: Flag.string("broadcast-ip").pipe(
     Flag.withDefault(defaultBroadcastIp),
-    Flag.withDescription("Broadcast address used to discover the plug"),
+    Flag.withDescription("Broadcast address used to discover the socket"),
     Flag.withFallbackConfig(Config.string("S20_BROADCAST_IP")),
   ),
   targetPort: Flag.integer("target-port").pipe(
     Flag.withDefault(defaultTargetPort),
-    Flag.withDescription("UDP port used by the plug"),
+    Flag.withDescription("UDP port used by the socket"),
     Flag.withFallbackConfig(Config.int("S20_TARGET_PORT")),
   ),
   timeoutMs: Flag.integer("timeout-ms").pipe(

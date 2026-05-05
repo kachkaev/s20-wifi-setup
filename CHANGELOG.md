@@ -1,5 +1,13 @@
 # s20-wifi-setup
 
+## 1.0.1
+
+### Patch Changes
+
+- Prefer the official "smart socket" wording across the CLI, package
+  metadata, and README, while keeping `smart-plug` in package keywords for
+  searchability.
+
 ## 1.0.0
 
 ### Minor Changes

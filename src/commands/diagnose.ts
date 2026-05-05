@@ -20,7 +20,7 @@ export const diagnoseCommand = Command.make("diagnose", {
   ),
   targetIp: Flag.string("target-ip").pipe(
     Flag.withDefault(defaultTargetIp),
-    Flag.withDescription("Plug IP to probe on the temporary Wi-Fi network"),
+    Flag.withDescription("Socket IP to probe on the temporary Wi-Fi network"),
   ),
   gatewayIp: Flag.string("gateway-ip").pipe(
     Flag.withDefault(defaultGatewayIp),
@@ -32,7 +32,7 @@ export const diagnoseCommand = Command.make("diagnose", {
   ),
   targetPort: Flag.integer("target-port").pipe(
     Flag.withDefault(defaultTargetPort),
-    Flag.withDescription("UDP port used by the plug"),
+    Flag.withDescription("UDP port used by the socket"),
   ),
   probeTimeoutMs: Flag.integer("probe-timeout-ms").pipe(
     Flag.withDefault(defaultResponseTimeoutMs),

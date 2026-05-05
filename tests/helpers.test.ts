@@ -42,7 +42,7 @@ void test("isDeviceReply distinguishes device replies from self echo", () => {
   assert.equal(isDeviceReply("HF-A11ASSISTHREAD"), false);
 });
 
-void test("isOkReply accepts the plug acknowledgement line", () => {
+void test("isOkReply accepts the socket acknowledgement line", () => {
   assert.equal(isOkReply("+ok"), true);
   assert.equal(isOkReply("+ok\r"), true);
   assert.equal(isOkReply("OK"), false);

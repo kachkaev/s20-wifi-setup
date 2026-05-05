@@ -83,7 +83,7 @@ void test("createSendUdpWithBroadcastFallback does not retry on permanent errors
 void test("validateExpectedResponse throws a detailed error when replies are missing", () => {
   assert.throws(() => {
     validateExpectedResponse("AT+WSSSID=test\r", okResponseExpectation, []);
-  }, /No response received from the plug\./);
+  }, /No response received from the socket\./);
 });
 
 void test("buildPairFailedMessage includes received replies and the expected response", () => {
