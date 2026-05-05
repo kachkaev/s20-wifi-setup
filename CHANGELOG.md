@@ -1,5 +1,15 @@
 # s20-wifi-setup
 
+## 1.0.0
+
+### Minor Changes
+
+- Refresh the README with clearer setup guidance, onboarding notes, and
+  troubleshooting advice for pairing legacy Orvibo Wiwo S20 plugs.
+- Improve pairing output by referring to the target network as "your Wi-Fi"
+  and surfacing the discovered plug MAC address in a clearer, colon-separated
+  format.
+
 ## 0.5.0
 
 ### Minor Changes
