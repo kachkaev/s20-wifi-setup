@@ -5,9 +5,9 @@
 ### Minor Changes
 
 - Refresh the README with clearer setup guidance, onboarding notes, and
-  troubleshooting advice for pairing legacy Orvibo Wiwo S20 plugs.
+  troubleshooting advice for pairing legacy Orvibo Wiwo S20 sockets.
 - Improve pairing output by referring to the target network as "your Wi-Fi"
-  and surfacing the discovered plug MAC address in a clearer, colon-separated
+  and surfacing the discovered device MAC address in a clearer, colon-separated
   format.
 
 ## 0.5.0
@@ -15,7 +15,7 @@
 ### Minor Changes
 
 - Refine the CLI, package, and README one-liner to make it clearer that the
-  tool connects legacy Orvibo Wiwo S20 smart plugs to Wi-Fi from the terminal.
+  tool connects legacy Orvibo Wiwo S20 smart sockets to Wi-Fi from the terminal.
 - Refactor command execution helpers to use Effect child processes internally
   while keeping the diagnostics and probe coverage passing.
 
@@ -45,4 +45,4 @@
 
 ### Minor Changes
 
-- Initial public release of the Effect-based CLI for pairing and diagnosing Orvibo Wiwo S20 smart plugs.
+- Initial public release of the Effect-based CLI for pairing and diagnosing Orvibo Wiwo S20 smart sockets.

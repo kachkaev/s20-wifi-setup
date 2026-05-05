@@ -1,17 +1,19 @@
 {
   "name": "s20-wifi-setup",
   "version": "1.0.0",
-  "description": "Connect legacy Orvibo Wiwo S20 smart plugs to Wi-Fi from the terminal",
+  "description": "Connect legacy Orvibo Wiwo S20 smart sockets to Wi-Fi from the terminal",
   "keywords": [
     "orvibo",
     "wiwo",
     "s20",
+    "smart-socket",
     "smart-plug",
     "home-assistant",
     "wifi",
     "pairing",
     "cli",
-    "effect"
+    "effect",
+    "effect-ts"
   ],
   "homepage": "https://github.com/kachkaev/s20-wifi-setup#readme",
   "bugs": {

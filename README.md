@@ -1,6 +1,6 @@
 # s20-wifi-setup
 
-_Connect legacy [Orvibo](https://www.orvibo.com) WiWo S20 smart plugs to Wi-Fi from the terminal_
+_Connect legacy [Orvibo](https://www.orvibo.com) WiWo S20 smart sockets to Wi-Fi from the terminal_
 
 [![npm version](https://img.shields.io/npm/v/s20-wifi-setup?logo=npm&color=3c7ef6&labelColor=333)](https://www.npmjs.com/package/s20-wifi-setup)
 [![npm downloads](https://img.shields.io/npm/dt/s20-wifi-setup?logo=npm&color=3c7ef6&labelColor=333)](https://www.npmjs.com/package/s20-wifi-setup)
@@ -8,14 +8,15 @@ _Connect legacy [Orvibo](https://www.orvibo.com) WiWo S20 smart plugs to Wi-Fi f
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-3c7ef6?labelColor=333)](LICENSE.md)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-friendly-3c7ef6?logo=homeassistant&logoColor=white&labelColor=333)](https://www.home-assistant.io/integrations/orvibo)
 
-The original WiWo app is no longer available, but the plugs still work.
-This command-line tool recreates the pairing flow used by the app, so you can connect the plug to your Wi-Fi network from a computer.
+The original WiWo app is no longer available, but the sockets still work.
+This command-line tool recreates the pairing flow used by the app, so you can connect the socket to your Wi-Fi network from a computer.
+If you searched for an Orvibo S20 smart plug, this repo covers the same device.
 
-If your plug looks like this, you're probably in the right place!
+If your socket looks like this, you're probably in the right place!
 
-<img src="docs/images/orvibo-wiwo-s20-light-blue.png" width="170" height="282" alt="Orvibo WiWo S20 smart plug">
+<img src="docs/images/orvibo-wiwo-s20-light-blue.png" width="170" height="282" alt="Orvibo WiWo S20 smart socket">
 
-> ⚠️ **Warning**  
+> ‼️ **Caution**  
 > [Home Assistant's Orvibo integration page](https://www.home-assistant.io/integrations/orvibo) warns about the European ORVIBO Wi-Fi SMART SOCKET S20 (`LGS-20`) and links to the [RAPEX recall entry](https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10002910).
 > That warning is about electrical safety, not software support.
 > Use this repo to pair hardware you already own.
@@ -23,11 +24,11 @@ If your plug looks like this, you're probably in the right place!
 
 ## What you will need
 
-- An Orvibo WiWo S20 plug
+- An Orvibo WiWo S20 socket
 - A Mac or Linux computer with Wi-Fi and Terminal access  
   _Windows may also work, but the tool was not tested there_
 - [Node.js](https://nodejs.org) 22 or newer installed
-- The Wi-Fi name and password that the plug should use
+- The Wi-Fi name and password that the socket should use
 
 You do not need to clone this repo or know JavaScript.
 If `node --version` or `npm --version` fail, install Node.js first and then come back here.
@@ -41,7 +42,7 @@ If `node --version` or `npm --version` fail, install Node.js first and then come
     ```
 
     Using `npx` here will usually fail.
-    Running `npx s20-wifi-setup` still checks the npm registry, which is unavailable once you switch to the plug's temporary Wi-Fi network.
+    Running `npx s20-wifi-setup` still checks the npm registry, which is unavailable once you switch to the socket's temporary Wi-Fi network.
 
     > 💡 **Tip**  
     > If a global install is inconvenient, you can install the tool into a throwaway local project instead:
@@ -65,13 +66,13 @@ If `node --version` or `npm --version` fail, install Node.js first and then come
 
 1.  Plug the S20 into a power socket.
 
-1.  Put the plug into pairing mode by pressing and holding the button on it.
+1.  Put the socket into pairing mode by pressing and holding the button on it.
     The LED should start flashing blue.
     If it flashes red instead, press and hold the button again.
 
-1.  On your computer, turn off any VPNs or other tools that change network routing until the plug is paired.
+1.  On your computer, turn off any VPNs or other tools that change network routing until the socket is paired.
 
-1.  Connect your computer to the plug's temporary Wi-Fi network, usually `WiWo-S20`.
+1.  Connect your computer to the socket's temporary Wi-Fi network, usually `WiWo-S20`.
 
 1.  Run the pairing command and replace the Wi-Fi details with your own:
 
@@ -90,11 +91,11 @@ If `node --version` or `npm --version` fail, install Node.js first and then come
     Done. The S20 should now reboot and join your Wi-Fi.
     ```
 
-1.  Wait a few seconds for the plug to reconnect to your usual Wi-Fi.
+1.  Wait a few seconds for the socket to reconnect to your usual Wi-Fi.
 
 1.  Reconnect your computer to your usual Wi-Fi network if needed.
 
-1.  Enjoy your smart plug!
+1.  Enjoy your smart socket!
 
     🎉 🎉 🎉  
     🎉 🔌 🎉  
@@ -115,7 +116,7 @@ Start with these checks:
 - Make sure the LED is still quickly flashing blue.
 - Confirm that your computer got a `10.10.100.x` address while joined to `WiWo-S20`.
 - Turn off VPNs or other tools that change network routing.
-- If the plug uses a non-default IP, try `--target-ip`.
+- If the socket uses a non-default IP, try `--target-ip`.
 
 Example:
 
@@ -144,12 +145,12 @@ If you want a quicker first pass, paste the report into an LLM alongside a link 
 ## What the tool actually does
 
 The S20 exposes a temporary Wi-Fi network while in pairing mode.
-Once your computer is connected to that network, this tool talks to the plug over UDP and reproduces the same AP-mode commands used by the original WiWo app.
+Once your computer is connected to that network, this tool talks to the socket over UDP and reproduces the same AP-mode commands used by the original WiWo app.
 
 It also handles a macOS-specific failure mode where discovery works, but direct sends to `10.10.100.254` fail with `EHOSTUNREACH`.
 When that happens, the CLI retries via subnet broadcast automatically.
 
-On Windows, pairing may still work because the actual pairing flow is just UDP over the plug's temporary network.
+On Windows, pairing may still work because the actual pairing flow is just UDP over the socket's temporary network.
 The unsupported part is diagnostics, not the core pairing protocol.
 
 ## Command reference
@@ -199,7 +200,7 @@ On Windows, it shows a warning and only produces a best-effort report.
 ## Development
 
 This section is for contributing to the tool itself.
-If you only want to pair a plug, you can ignore it.
+If you only want to pair a socket, you can ignore it.
 
 Install dependencies:
 
