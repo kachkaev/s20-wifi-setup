@@ -79,12 +79,12 @@ export const formatLinuxAddress = (text: string) =>
 
 export const formatLinuxRoute = (text: string) => trimTrailingWhitespace(text);
 
-export const formatLinuxNeighbours = (text: string, targetIp: string) => {
+export const formatLinuxNeighbors = (text: string, targetIp: string) => {
   const subnetPrefix = getSubnetPrefix(targetIp);
   const lines = filterLines(
     text,
     (line) => line.includes(targetIp) || line.includes(subnetPrefix),
   );
 
-  return lines.length > 0 ? lines.join("\n") : "(no matching neighbours)";
+  return lines.length > 0 ? lines.join("\n") : "(no matching neighbors)";
 };

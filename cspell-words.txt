@@ -1,6 +1,7 @@
 AirPort
 ASSISTHREAD
 autocorrect
+cli
 darrensteele
 dedupe
 DGRAM
@@ -10,8 +11,8 @@ env
 esbuild
 getairportnetwork
 getifaddr
-HomeAssistant
 HISTCONTROL
+HomeAssistant
 ifconfig
 ifscope
 ignoreboth
@@ -31,6 +32,7 @@ msgpackr
 netstat
 networksetup
 Orvibo
+pnp
 RAPEX
 recvfrom
 REUSEADDR
@@ -40,7 +42,9 @@ setsockopt
 settimeout
 tcpdump
 TCPPID
+tgz
 tsc
+udp
 UHLWbI
 UHLWI
 UHLWIir

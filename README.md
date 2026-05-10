@@ -34,7 +34,7 @@ If `node --version` or `npm --version` fail, install Node.js first and then come
 
 ## Step-by-step pairing instructions
 
-1.  Install the tool while your computer is still connected to the internet:
+1.  Install the tool while your computer is connected to the internet:
 
     ```sh
     npm install --global s20-wifi-setup
@@ -55,7 +55,7 @@ If `node --version` or `npm --version` fail, install Node.js first and then come
     > If you install the tool locally, run `npm exec s20-wifi-setup -- [args]` from that directory instead of `s20-wifi-setup [args]`.
     > The rest of this README assumes a global install.
 
-1.  While your computer is still connected to the internet, make sure the pairing tool starts correctly:
+1.  Make sure the pairing tool starts correctly:
 
     ```sh
     s20-wifi-setup --help
@@ -80,8 +80,8 @@ If `node --version` or `npm --version` fail, install Node.js first and then come
     ```
 
     > 💡 **Tip**  
-    > The command above includes your Wi-Fi password, so it may end up in your shell history.
-    > In Bash, adding a leading space can keep it out of history if `HISTCONTROL` is set to `ignorespace` or `ignoreboth`.
+    > This command includes your Wi-Fi password, so it might be saved in your shell history.  
+    > In many setups, adding a space before the command prevents that.
 
 1.  Wait for the command to finish.
     You should see:
@@ -132,14 +132,12 @@ If that still does not work and you are on macOS or Linux, collect a diagnostic 
 s20-wifi-setup diagnose
 ```
 
-Do not rely on `diagnose` as your next step on Windows.
-The most useful diagnostics currently require macOS or Linux.
-
 The `diagnose` command prints a full report to stdout.
 It may prompt for `sudo` so it can clear stale ARP state and run `tcpdump`.
 
 You can create an issue describing the details, but please be mindful about sharing private information such as MAC addresses or Wi-Fi names.
 If you want a quicker first pass, paste the report into an LLM alongside a link to this repo instead of opening an issue right away.
+If you manage to find and fix a bug in `s20-wifi-setup`, please consider opening a pull request.
 
 ## What the tool actually does
 
@@ -216,11 +214,11 @@ pnpm test
 
 Useful commands:
 
-- `pnpm build` builds the bundled `dist/cli.js` artifact used for npm publishing.
-- `node src/cli.ts pair --ssid "MyWifi" --password "super-secret"` runs the pairing flow locally.
-- `node src/cli.ts diagnose` runs the diagnostics flow locally.
+- `pnpm build` produces the bundled `dist/cli.js` artifact used for npm publishing.
+- `node src/cli.ts pair --ssid "MyWifi" --password "super-secret"` runs the pairing flow from source.
+- `node src/cli.ts diagnose` runs the diagnostics flow from source.
 - `pnpm lint` runs linters (cspell, eslint, knip, markdownlint, pnpm dedupe, prettier, and TypeScript).
-- `pnpm fix` applies the available autofixes.
+- `pnpm fix` applies available autofixes for linters.
 - `pnpm test` runs the hardware-free unit tests.
 
 ## Acknowledgements

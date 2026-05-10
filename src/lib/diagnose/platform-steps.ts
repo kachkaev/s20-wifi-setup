@@ -1,6 +1,6 @@
 import {
   formatLinuxAddress,
-  formatLinuxNeighbours,
+  formatLinuxNeighbors,
   formatLinuxRoute,
   formatMacOsArp,
   formatMacOsIfconfig,
@@ -119,7 +119,7 @@ export const buildPlatformDiagnoseSteps = (
         args: ["neigh", "show"],
         requiredCommands: ["ip"],
         transformOutput: (result) =>
-          formatLinuxNeighbours(result.stdout, options.targetIp),
+          formatLinuxNeighbors(result.stdout, options.targetIp),
       },
     ];
   }

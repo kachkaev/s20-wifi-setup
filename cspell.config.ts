@@ -16,7 +16,7 @@ export default defineConfig({
     "node_modules/**",
     "pnpm-lock.yaml",
   ],
-  language: "en,en-GB",
+  language: "en",
   minWordLength: 3,
   useGitignore: true,
 });
