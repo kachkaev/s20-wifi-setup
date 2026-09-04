@@ -89,9 +89,16 @@
     "typescript": "6.0.3",
     "vite": "7.2.0"
   },
-  "packageManager": "pnpm@11.0.3",
+  "packageManager": "pnpm@12.3.3",
   "engines": {
     "node": ">=22.0.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "22.22.2",
+      "onFail": "download"
+    }
   },
   "publishConfig": {
     "access": "public",
