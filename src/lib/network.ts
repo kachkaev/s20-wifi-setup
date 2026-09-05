@@ -26,8 +26,8 @@ const ipv4ToInt = (ip: string) => {
   for (const part of ip.split(".")) {
     const octet = Number(part);
 
-    if (!Number.isInteger(octet) || octet < 0 || octet > 255) {
-      return Number.NaN;
+    if (!Number.isSafeInteger(octet) || octet < 0 || octet > 255) {
+      return NaN;
     }
 
     result = (result << 8) | octet;

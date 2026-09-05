@@ -39,6 +39,7 @@ export const resolveDiagnoseStepAvailability = (
   }
 
   const missingCommands = step.requiredCommands.filter(
+    // eslint-disable-next-line unicorn/no-computed-property-existence-check -- availableCommands maps every command to a boolean, so this checks the value, not the key
     (command) => !availableCommands[command],
   );
 
@@ -251,10 +252,11 @@ export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
 
     yield* runNodeSnapshot(options, reporter);
 
-    for (const step of platformSteps.map((platformStep) =>
-      resolveDiagnoseStepAvailability(platformStep, availableCommands),
-    )) {
-      yield* runStep(step, reporter);
+    for (const platformStep of platformSteps) {
+      yield* runStep(
+        resolveDiagnoseStepAvailability(platformStep, availableCommands),
+        reporter,
+      );
     }
 
     const sudoValidated = yield* runSudoValidation(reporter, availableCommands);
