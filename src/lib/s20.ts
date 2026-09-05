@@ -47,7 +47,7 @@ export const parseDiscoveryReply = (
     return undefined;
   }
 
-  const [ip, mac, module] = text.split(",");
+  const [ip, mac, module] = text.split(",", 3);
 
   if (ip === undefined || mac === undefined || module === undefined) {
     return undefined;

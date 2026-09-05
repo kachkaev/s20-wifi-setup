@@ -177,7 +177,7 @@ export const validateExpectedResponse = (
   if (
     responses.length === 0 ||
     (expectedResponse !== undefined &&
-      !responses.some((response) => expectedResponse.matches(response.text)))
+      responses.every((response) => !expectedResponse.matches(response.text)))
   ) {
     throw new Error(
       buildPairFailedMessage(message, expectedResponse, responses),

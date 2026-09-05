@@ -5,10 +5,7 @@ import test from "node:test";
 import { Effect } from "effect";
 
 import { runPingStep, runUdpProbeSection } from "../src/lib/diagnose/probes.ts";
-import {
-  type DiagnoseOptions,
-  type Reporter,
-} from "../src/lib/diagnose/types.ts";
+import type { DiagnoseOptions, Reporter } from "../src/lib/diagnose/types.ts";
 import type { CapturedCommandResult } from "../src/lib/process.ts";
 import type { UdpResponse } from "../src/lib/udp.ts";
 
