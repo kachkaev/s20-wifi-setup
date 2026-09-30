@@ -217,7 +217,7 @@ Useful commands:
 - `pnpm build` produces the bundled `dist/cli.js` artifact used for npm publishing.
 - `node src/cli.ts pair --ssid "MyWifi" --password "super-secret"` runs the pairing flow from source.
 - `node src/cli.ts diagnose` runs the diagnostics flow from source.
-- `pnpm lint` runs linters (cspell, eslint, knip, markdownlint, pnpm dedupe, prettier, and TypeScript).
+- `pnpm lint` runs linters (cspell, eslint, knip, markdownlint, prettier, and TypeScript).
 - `pnpm fix` applies available autofixes for linters.
 - `pnpm test` runs the hardware-free unit tests.
 
