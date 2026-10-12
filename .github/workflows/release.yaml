@@ -48,7 +48,7 @@ jobs:
       # npm scans a new version for malware for a few minutes before listing
       # it, so a run right after the one that published sees the version as
       # unpublished and fails with 409 Conflict on publishing it again. The
-      # version's tag, which changesets pushes after publishing, does not lag.
+      # version's tag, which the publish step below pushes, does not lag.
       # Drop this check once changesets handles the scan window:
       # https://github.com/changesets/changesets/issues/2195
       - name: Check if the current version is already tagged
@@ -59,12 +59,23 @@ jobs:
             echo "exists=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Publishing goes through the action so that it pushes the version's tag
-      # (and creates a GitHub release), which the check above relies on
-      - name: Create release pull request or publish to npm
-        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+      # Changesets action v2 requires changesets CLI v3, and publishing through
+      # v1 would make it write an `.npmrc` with `NPM_TOKEN`, which trusted
+      # publishing does not use. So v1 only maintains the release pull request
+      # (and sets up the git user that tags need), and publishing happens below
+      - name: Create release pull request or prepare publish
+        id: changesets
+        uses: changesets/action@c48e67d110a68bc90ccf1098e9646092baacaa87 # v1.6.0
         with:
-          pr-title: Version packages
-          version-script: pnpm changesets:version
-          # An empty script makes the action skip publishing
-          publish-script: ${{ steps.version-tag.outputs.exists != 'true' && 'pnpm changesets:publish' || '' }}
+          title: Version packages
+          version: pnpm changesets:version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # `changeset publish` tags the version it publishes but does not push the
+      # tag, which the check above needs on the remote
+      - name: Publish to npm
+        if: steps.changesets.outputs.hasChangesets == 'false' && steps.version-tag.outputs.exists != 'true'
+        run: |
+          pnpm changesets:publish
+          git push origin --tags
