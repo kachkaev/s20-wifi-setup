@@ -45,15 +45,26 @@ jobs:
       - name: Verify tests
         run: pnpm test
 
-      - name: Create release pull request or prepare publish
-        id: changesets
-        uses: changesets/action@c48e67d110a68bc90ccf1098e9646092baacaa87 # v1.6.0
-        with:
-          title: Version packages
-          version: pnpm changesets:version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # npm scans a new version for malware for a few minutes before listing
+      # it, so a run right after the one that published sees the version as
+      # unpublished and fails with 409 Conflict on publishing it again. The
+      # version's tag, which changesets pushes after publishing, does not lag.
+      # Drop this check once changesets handles the scan window:
+      # https://github.com/changesets/changesets/issues/2195
+      - name: Check if the current version is already tagged
+        id: version-tag
+        run: |
+          version=$(node --print "require('./package.json').version")
+          if git rev-parse --quiet --verify "refs/tags/v$version" > /dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Publish to npm
-        if: steps.changesets.outputs.hasChangesets == 'false'
-        run: pnpm changesets:publish
+      # Publishing goes through the action so that it pushes the version's tag
+      # (and creates a GitHub release), which the check above relies on
+      - name: Create release pull request or publish to npm
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          pr-title: Version packages
+          version-script: pnpm changesets:version
+          # An empty script makes the action skip publishing
+          publish-script: ${{ steps.version-tag.outputs.exists != 'true' && 'pnpm changesets:publish' || '' }}
