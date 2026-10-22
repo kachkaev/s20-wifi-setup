@@ -1,5 +1,5 @@
 import { Config, Console, Effect, Option, Redacted } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { Command, Flag } from "effect/cli";
 
 import { findLocalBindIp } from "../lib/network.ts";
 import {
@@ -325,33 +325,33 @@ const runPair = (options: PairOptions) =>
   });
 
 export const pairCommand = Command.make("pair", {
-  ssid: Flag.string("ssid").pipe(
+  ssid: Flag.String("ssid").pipe(
     Flag.withDescription("Name of the Wi-Fi network the socket should join"),
-    Flag.withFallbackConfig(Config.string("WIFI_SSID")),
+    Flag.withFallbackConfig(Config.String("WIFI_SSID")),
   ),
-  password: Flag.redacted("password").pipe(
+  password: Flag.Redacted("password").pipe(
     Flag.withDescription("Password for that Wi-Fi network"),
-    Flag.withFallbackConfig(Config.redacted("WIFI_PASSWORD")),
+    Flag.withFallbackConfig(Config.Redacted("WIFI_PASSWORD")),
   ),
   targetIp: Flag.optional(
-    Flag.string("target-ip").pipe(
+    Flag.String("target-ip").pipe(
       Flag.withDescription(
         "Skip discovery and talk to this socket IP directly",
       ),
-      Flag.withFallbackConfig(Config.string("S20_TARGET_IP")),
+      Flag.withFallbackConfig(Config.String("S20_TARGET_IP")),
     ),
   ),
-  broadcastIp: Flag.string("broadcast-ip").pipe(
+  broadcastIp: Flag.String("broadcast-ip").pipe(
     Flag.withDefault(defaultBroadcastIp),
     Flag.withDescription("Broadcast address used to discover the socket"),
-    Flag.withFallbackConfig(Config.string("S20_BROADCAST_IP")),
+    Flag.withFallbackConfig(Config.String("S20_BROADCAST_IP")),
   ),
-  targetPort: Flag.integer("target-port").pipe(
+  targetPort: Flag.Int("target-port").pipe(
     Flag.withDefault(defaultTargetPort),
     Flag.withDescription("UDP port used by the socket"),
-    Flag.withFallbackConfig(Config.int("S20_TARGET_PORT")),
+    Flag.withFallbackConfig(Config.Int("S20_TARGET_PORT")),
   ),
-  timeoutMs: Flag.integer("timeout-ms").pipe(
+  timeoutMs: Flag.Int("timeout-ms").pipe(
     Flag.withDefault(defaultResponseTimeoutMs),
     Flag.withDescription("How long to wait for discovery and replies"),
   ),

@@ -1,5 +1,5 @@
 import { Option } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { Command, Flag } from "effect/cli";
 
 import {
   defaultBroadcastIp,
@@ -12,33 +12,33 @@ import {
 
 export const diagnoseCommand = Command.make("diagnose", {
   interfaceName: Flag.optional(
-    Flag.string("interface").pipe(
+    Flag.String("interface").pipe(
       Flag.withDescription(
         "Network interface to inspect (defaults to en0 on macOS)",
       ),
     ),
   ),
-  targetIp: Flag.string("target-ip").pipe(
+  targetIp: Flag.String("target-ip").pipe(
     Flag.withDefault(defaultTargetIp),
     Flag.withDescription("Socket IP to probe on the temporary Wi-Fi network"),
   ),
-  gatewayIp: Flag.string("gateway-ip").pipe(
+  gatewayIp: Flag.String("gateway-ip").pipe(
     Flag.withDefault(defaultGatewayIp),
     Flag.withDescription("Gateway IP to ping during diagnostics"),
   ),
-  broadcastIp: Flag.string("broadcast-ip").pipe(
+  broadcastIp: Flag.String("broadcast-ip").pipe(
     Flag.withDefault(defaultBroadcastIp),
     Flag.withDescription("Broadcast IP to probe on the temporary network"),
   ),
-  targetPort: Flag.integer("target-port").pipe(
+  targetPort: Flag.Int("target-port").pipe(
     Flag.withDefault(defaultTargetPort),
     Flag.withDescription("UDP port used by the socket"),
   ),
-  probeTimeoutMs: Flag.integer("probe-timeout-ms").pipe(
+  probeTimeoutMs: Flag.Int("probe-timeout-ms").pipe(
     Flag.withDefault(defaultResponseTimeoutMs),
     Flag.withDescription("How long to wait for each UDP probe"),
   ),
-  captureSeconds: Flag.integer("capture-seconds").pipe(
+  captureSeconds: Flag.Int("capture-seconds").pipe(
     Flag.withDefault(4),
     Flag.withDescription("Maximum tcpdump capture duration in seconds"),
   ),
