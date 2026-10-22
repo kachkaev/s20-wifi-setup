@@ -263,8 +263,7 @@ export const runDiagnose = (rawOptions: RawDiagnoseOptions) =>
     yield* runArpClearStep(options, reporter, availableCommands, sudoValidated);
 
     let captureStopper:
-      | (() => Effect.Effect<CapturedCommandResult, Error>)
-      | undefined;
+      (() => Effect.Effect<CapturedCommandResult, Error>) | undefined;
 
     if (
       sudoValidated &&
