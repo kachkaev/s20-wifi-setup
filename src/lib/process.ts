@@ -1,6 +1,6 @@
 import { NodeServices } from "@effect/platform-node";
 import { Effect, Exit, Fiber, Scope, Stream } from "effect";
-import { ChildProcess } from "effect/unstable/process";
+import { ChildProcess } from "effect/process";
 
 export type CapturedCommandResult = {
   readonly command: string;
@@ -31,7 +31,7 @@ const toError = (error: unknown) =>
 export const commandExists = (command: string): Effect.Effect<boolean> =>
   Effect.scoped(
     Effect.gen(function* () {
-      const handle = yield* (
+      const lookup =
         process.platform === "win32"
           ? ChildProcess.make("where", [command], {
               stdin: "ignore",
@@ -46,8 +46,8 @@ export const commandExists = (command: string): Effect.Effect<boolean> =>
                 stdout: "ignore",
                 stderr: "ignore",
               },
-            )
-      ).asEffect();
+            );
+      const handle = yield* lookup;
 
       const exitCode = yield* handle.exitCode;
       return exitCode === 0;
@@ -68,7 +68,7 @@ export const runCapturedCommand = (
     Effect.gen(function* () {
       const handle = yield* ChildProcess.make(command, [...args], {
         stdin: options?.stdin ?? "ignore",
-      }).asEffect();
+      });
 
       const { stdout, stderr, combined, exitCode } = yield* Effect.all(
         {
@@ -102,7 +102,7 @@ export const runInteractiveCommand = (
         stdin: "inherit",
         stdout: "inherit",
         stderr: "inherit",
-      }).asEffect();
+      });
 
       return Number(yield* handle.exitCode);
     }),
@@ -121,7 +121,7 @@ export const startCapturedCommand = (
     const handle = yield* Effect.provideService(
       ChildProcess.make(command, [...args], {
         stdin: options?.stdin ?? "ignore",
-      }).asEffect(),
+      }),
       Scope.Scope,
       scope,
     ).pipe(Effect.mapError(toError));

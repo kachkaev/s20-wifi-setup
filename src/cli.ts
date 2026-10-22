@@ -1,6 +1,6 @@
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { Console, Effect } from "effect";
-import { Command } from "effect/unstable/cli";
+import { Command } from "effect/cli";
 
 import packageJson from "../package.json" with { type: "json" };
 import { diagnoseCommand } from "./commands/diagnose.ts";
